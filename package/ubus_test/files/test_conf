@@ -1,0 +1,3 @@
+config system 'my_conf'
+	option thisnumber '10'
+
