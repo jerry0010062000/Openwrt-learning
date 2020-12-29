@@ -1,5 +1,0 @@
-config HELLO_KMOD
-    tristate "Test kernel driver"
-    help
-        This is an Kernel Driver Test
-        if unsure ,delete it ,just for fun
