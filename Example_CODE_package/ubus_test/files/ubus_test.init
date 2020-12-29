@@ -1,0 +1,13 @@
+#!/bin/sh /etc/rc.common
+
+START=15
+STOP=85
+
+start(){
+    /usr/sbin/myserver
+    /usr/sbin/mySS
+ }
+
+stop(){
+    echo "Stop ubus_test"
+}

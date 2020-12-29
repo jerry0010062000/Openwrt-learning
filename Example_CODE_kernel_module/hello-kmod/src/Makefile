@@ -1,0 +1,1 @@
+obj-${CONFIG_HELLO-KMOD}+= hello_kmod.o
