@@ -1,5 +1,5 @@
-# 這是一個openwrt的學習筆記 
-##by _jerry0010062000_
+# This is a OpenWRT notes
+## _create by jerry0010062000_
 
 
  
