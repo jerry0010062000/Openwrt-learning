@@ -27,28 +27,28 @@
   - 判斷uevent "SUBSYSTEM"為button，執行`/etc/rc.bottom/failsafe`建立檔案`/tmp/failsafe-button`
 
 * preinit.sh定義了五個hook後執行`/lib/preinit/`目錄下腳本，每個腳本定義了一個function並且將其掛到五個hook上，分別是:
-
+```bash
 >preinit_essential
 >preinit_main
->>define_default_set_state
->>preinit_ip	
->>pi_indicate_preinit
->>do_sysinfo_generic
->>failsafe_wait    //判斷failsafe-button是否存在 有則設置變數FAILSAFE為真
->>run_failsafe_hook    //若FAILSAFE為真則執行hook failsafe
->>indicate_regular_preinit
->>initramfs_test
->>do_mount_root
->>run_init
+    >>define_default_set_state
+    >>preinit_ip	
+    >>pi_indicate_preinit
+    >>do_sysinfo_generic
+    >>failsafe_wait    		#判斷failsafe-button是否存在 有則設置變數FAILSAFE為真
+    >>run_failsafe_hook    	#若FAILSAFE為真則執行hook failsafe
+    >>indicate_regular_preinit
+    >>initramfs_test
+    >>do_mount_root
+    >>run_init
 
 >failsafe
->>indicate_failsafe
->>failsafe_netlogin
->>failsafe_shell
+    >>indicate_failsafe
+    >>failsafe_netlogin
+    >>failsafe_shell
 
 >initramfs
 >preinit_mount_root
-
+```
 實際上只執行`preinit_essential`和 `preinit_main`
 
 
