@@ -12,7 +12,7 @@
 
 <h3 id="init">系統開機流程</h3>
 <div align=center><img src="image/init-img.png" width="" height="" alt="init-proc"/></div>
-_參考自_ :https://dongshao.blog.csdn.net/article/details/102767797
+		_參考自_ :https://dongshao.blog.csdn.net/article/details/102767797
 
 ---------------------------------------------------------------------------------------------
 
