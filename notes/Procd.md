@@ -3,14 +3,16 @@
 
 
 * 主要功能
-  * 開機時執行初始化並取代成為pid = 1
+  * [開機時執行初始](#init)
   * [檢查config是否變化](#reload_config)
   * 維護process、接收request、增減process
   * [procd.sh](#procd_sh)
 
-<h2 id="reload_config">Reload_config</h2>
+<h3 id="init">系統初始化</h3>
 
-<h2 id="proce_sh">Procd.sh</h2>
+<h3 id="reload_config">Reload_config</h3>
+
+<h3 id="proce_sh">Procd.sh</h3>
 由於使用ubus method必須使用json格式，容易出錯，procd.sh將其封裝成函數
 
 ```bash
@@ -25,7 +27,7 @@ procd_set_param					#設定instance參數
 	-command	@啟動的命令
 	-respawn	@意外結束時的重啟機制
 	-env		@環境變數
-	-file		@比較此文件是否有改變
+	-file		@比較配置文件是否有改變
 	-netdev		@綁定的網路設備
 	-limits		@process的資源限制
 procd_close_intsance			#結束定義instance
