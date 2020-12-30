@@ -9,7 +9,7 @@
   * [procd.sh](#procd_sh)
 
 <h3 id="init">系統初始化</h3>
-![initimg][image/init-img.png]
+<div align=center><img src="image/init-img.png" width="" height="" alt="init-proc"/></div>
 _參考自_ :https://dongshao.blog.csdn.net/article/details/102767797
 
 <h3 id="reload_config">Reload_config</h3>
