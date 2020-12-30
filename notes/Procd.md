@@ -8,15 +8,25 @@
   * 維護process、接收request、增減process
   * [procd.sh](#procd_sh)
 
+
+
 <h3 id="init">系統開機流程</h3>
 <div align=center><img src="image/init-img.png" width="" height="" alt="init-proc"/></div>
 _參考自_ :https://dongshao.blog.csdn.net/article/details/102767797
 
-在Init中 fork出來的procd代入參數`/etc/hotplug-preinit.json`執行兩項檢測動作
+
+
+在Init中總共創建出三支子程式執行任務 分別是 `kmodloader` `procd` `preinit.sh` 
+
+* 在Init中 fork出來的procd代入參數`/etc/hotplug-preinit.json`執行兩項檢測動作
   - 韌體升級uevent 執行腳本`/sbin/hotplug-call`加載`/lib/firmware`下的升級
   - 判斷uevent "SUBSYSTEM"為button，執行`/etc/rc.bottom/failsafe`建立檔案`/tmp/failsafe-button`
 
+
+
 <h3 id="reload_config">Reload_config</h3>
+
+
 
 <h3 id="proce_sh">Procd.sh</h3>
 由於使用ubus method必須使用json格式，容易出錯，procd.sh將其封裝成函數
