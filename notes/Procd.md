@@ -16,7 +16,9 @@
 ```bash
 procd_open_trigger				#開始定義一組trigger
 procd_close_trigger				#結束定義trigger
-procd_add_reload_trigger		#定義關注的config(位於/etc/config下)，當													reload_config後如果關注的檔案被修改則觸發														reload_service()
+procd_add_reload_trigger		#定義關注的config(位於/etc/config下)，當
+								#reload_config後如果關注的檔案被修改則觸
+								#reload_service()
 ```
 
 ```bash
