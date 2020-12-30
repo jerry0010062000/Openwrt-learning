@@ -1,14 +1,14 @@
 # Procd
-===================================
+==========================================================
 
 
 * 主要功能
   * 開機時執行初始化並取代成為pid = 1
-  * [檢查config是否變化]
+  * [檢查config是否變化](#reload_config)
   * 維護process、接收request、增減process
   * [procd.sh](#procd_sh)
 
-
+<h2 id="reload_config">Reload_config</h2>
 
 <h2 id="proce_sh">Procd.sh</h2>
 由於使用ubus method必須使用json格式，容易出錯，procd.sh將其封裝成函數
@@ -16,7 +16,7 @@
 ```bash
 procd_open_trigger				#開始定義一組trigger
 procd_close_trigger				#結束定義trigger
-procd_add_reload_trigger		#定義關注的config(位於/etc/config下)，當reload_config後如果關注的檔案被修改則觸發reload_service()
+procd_add_reload_trigger		#定義關注的config，當reload_config後如果關注的檔案被修改則觸發reload_service()
 ```
 
 ```bash
