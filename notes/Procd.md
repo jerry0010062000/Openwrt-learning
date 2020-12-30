@@ -14,7 +14,7 @@
 <div align=center><img src="image/init-img.png" width="" height="" alt="init-proc"/></div>
 _參考自_ :https://dongshao.blog.csdn.net/article/details/102767797
 
-
+---------------------------------------------------------------------------------------------
 
 在Init中總共創建出三支子程式執行任務 分別是 `kmodloader` `procd` `preinit.sh` 
 
