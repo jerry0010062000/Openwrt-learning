@@ -51,7 +51,7 @@ config 'interface' 'wan'
         option 'proto' 'dhcp'
         option 'ifname' 'eth0.2'
 ```
-### proto選項
+### Proto欄位選項
 
 | Proto | Description |
 | :--- | :---------- |
