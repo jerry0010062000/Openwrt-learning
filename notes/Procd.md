@@ -28,8 +28,10 @@
 
 * preinit.sh定義了五個hook後執行`/lib/preinit/`目錄下腳本，每個腳本定義了一個function並且將其掛到五個hook上，分別是:
 ```bash
+>#hook
 >preinit_essential
 >preinit_main
+	>>#script
     >>define_default_set_state
     >>preinit_ip	
     >>pi_indicate_preinit
