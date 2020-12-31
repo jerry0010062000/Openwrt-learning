@@ -3,6 +3,7 @@
 ---------------------------
 
 > 本文摘自 https://openwrt.org/docs/guide-user/base-system/basic-networking 並省略了一些細節
+> 
 
 UCI將config儲存在`/etc/config`下，而network這個uci子系統負責定義`switch VLANS` `interface configurations` 和 `network routes` 
 
@@ -64,6 +65,26 @@ config 'interface' 'wan'
 |3g|第三代行動通訊協定|
 |...|etc|
 |none|未指定的protocol 忽略其他的interface設定，相當於disable|
+
+根據interface protocol，可能還需要聲明以下參數
+
+| name | type | Default | Description |
+| ---- | ---- | ---- | ---- |
+|ifname|interface name|none|如果設置為bridge 則此欄位為list，WLAN interface是動態或不可預測的，因此建議在無線配置中分配給bridge|
+|types|string|none| |
+| stp |bool|0|bridge限定，啟動Spanning Tree Protocol|
+|bridge_empty|bool|0|bridge限定，創建空的橋接器|
+|igmp_snooping|bool|0|bridge限定，multicast_snooping kernel setting |
+|multicast_querier|bool|看igmp|bridge限定，multicast_querier  kernel setting|
+|macaddr|mac addr|none|覆寫mac address|
+|mtu|number|none|覆寫MTU|
+|auto|bool|proto為none時0，其他1|指定是否在啟動時創建interface|
+|ipv6|bool|1|是否套用ipv6|
+
+## WAN
+
+
+
 
 
 
