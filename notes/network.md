@@ -1,6 +1,6 @@
 # Network (/etc/config/network)
 
-========
+---------------------------
 
 > 本文摘自 https://openwrt.org/docs/guide-user/base-system/basic-networking 並省略了一些細節
 
