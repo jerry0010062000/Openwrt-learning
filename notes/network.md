@@ -81,7 +81,6 @@ config 'interface' 'wan'
 |auto|bool|proto為none時0，其他1|指定是否在啟動時創建interface|
 |ipv6|bool|1|是否套用ipv6|
 
-## WAN
 
 
 
