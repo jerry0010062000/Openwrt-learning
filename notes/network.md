@@ -5,6 +5,7 @@
 > 本文摘自 https://openwrt.org/docs/guide-user/base-system/basic-networking 並省略了一些細節
 > 
 + Netifd設計
+	- [Netifd consist](#consist)
 	- [Config reload](#CF_reload)
 	- [Netifd - Device](#Dev)
 	- [Netifd - Interface](#itf)
@@ -17,6 +18,14 @@
 	- Config如何改變且在何時何處reload?
 	- Device和Interface的state machine?
 -----------------------------------------------
+<h2 id="consist">Netifd consist</h2>
+1. Shell腳本 `/sbin/ifup`、`/sbin/ifdown`、`/sbin/ifstatus`、`/sbin/devstatus` 
+2. init.d腳本 `/etc/init.d/network`
+3. hotplug腳本 `/etc/hotplug.d/iface/00-netstate`、` /etc/hotplug.d/iface/10-sysctl`
+4. udhcpc `/usr/share/udhcpc/default.script`
+5. netifd deamon `/sbin/netifd`
+
+--------------
 <h2 id="CF_reload">Config reload</h2>
 
 UCI將config儲存在`/etc/config`下，而network這個uci子系統負責定義`switch VLANS` `interface configurations` 和 `network routes` 
