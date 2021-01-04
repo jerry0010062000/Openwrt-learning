@@ -59,7 +59,16 @@ Device依照up/down進行refcounter管理。調用`claim_device()`
 	2. IP address、Route等Layer3屬性
 	3. 設定完成後可能需要更新的Layer3屬性。如static、DHCP、PPPoE等。
 
-`Interface`表示一個高級配置應用於一個或多個`Device`上
+`Interface`表示一個高級配置應用於一個或多個`Device`上。Interface必須被配置到一個主要Device上。在Default下，Layer3設備只需要被映射到簡單配置的protocol上，例如: static、DHCP等，更複雜的protocol，如pptp或VPN才需要新映射到外部模組上。
+
+Interface state訊息如下:
+|EVENT|DESCRIPTION|
+|---|----------------|
+|IFS_SETUP|此interface正在被proto handler配置中|
+|IFS_UP|Interface成功被配置|
+|IFS_TEARDOWN|interface準備取消配置|
+|IFS_DOWN|interfac已取消配置|
+
 
 ----------------
 <h2 id="inter_set">Interface setting</h2>
@@ -74,7 +83,6 @@ network.lan.netmask='255.255.255.0'
 network.lan.ip6assign='60'
 network.lan.ipaddr='192.168.1.1'
 ```
---------
 在Config File裡:
 
 ```
