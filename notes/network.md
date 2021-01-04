@@ -4,6 +4,19 @@
 
 > 本文摘自 https://openwrt.org/docs/guide-user/base-system/basic-networking 並省略了一些細節
 > 
++ 筆記內容
+	- [Config reload](#CF_reload)
+	- [Netifd - Device](#Dev)
+	- [Netifd - Interface](#itf)
+	- [Netifd - interface setting](#inter_set)
+	- [Netifd - protocol setting](#proto_feild)
++ 問題清單
+	- [Default config是怎麼生成的?](#Def_C)
+	- Device與Interface之間的差別?
+	- Config如何改變且在何時何處reload?
+	- Device和Interface的state machine?
+-----------------------------------------------
+<h2 id="CF_reload">Config reload</h2>
 
 UCI將config儲存在`/etc/config`下，而network這個uci子系統負責定義`switch VLANS` `interface configurations` 和 `network routes` 
 
@@ -15,13 +28,41 @@ service network reload
 ```bash
 /etc/init.d/network reload
 ```
-## Netifd
 
-在`netifd`中定義了`Device` `interface` `proto handler` 
 
-而作為一個路由器使用者我們只需關心配置Interface層，創建一個interface並指名其依賴的Device，及綁定上網方式(proto handler)，就完成網路設定可以開始工作，當網路狀態發生改變時，三者也能互相通知。
 
-### 一個LAN interface的範例設定
+<h2 id="Dev">Device</h2>
+
+在`netifd`中定義了三個level:`Device`、 `interface`、 `proto handler` 
+
+而作為一個路由器使用者我們只需關心配置Interface層，創建一個Interface並指名其依賴的Device，及綁定上網方式(proto handler)，就完成網路設定可以開始工作，當網路狀態發生改變時，三者也能互相通知。
+
+`Device`代表物理接口(eg.eth0)或是虛擬連結(eg. VPN links or tunnels)，每個`Device`至少會綁定一個`Device_user`，當最後一個user被刪除時，Device也會跟著被刪除。Device亦可引用其他Device(用於管理不特定的Device，eg.網橋、vlan)。
+
+Device依照up/down進行refcounter管理。調用`claim_device()`
+
+已註冊的Device可能無法立即的被使用，Device的state轉換將會通過以下事件類型告知所有device_user:
+|EVENT|DESCRIPTION|
+|---|----------------|
+|DEV_EVENT_ADD|Device現在已存在系統中，如果已經有device_user就會立刻發送事件|
+|DEV_EVENT_REMOVE|這個設備不再可用，所有的device_user必須刪除其引用|
+|DEV_EVENT_SETUP|設備即將被啟動，Users可設定一些必要的配置參數，但並非所有時候都會產生這個EVENT|
+|DEV_EVENT_UP|設備已經啟動|
+|DEV_EVENT_TEARDOWN|設備即將被關閉|
+|DEV_EVENT_DOWN|設備已被關閉|
+
+----------------
+<h2 id="itf">Interface</h2>
+
++ 配置一個Interface通常要完成下列工作
+	1. MAC address、MTU、協商速率等Layer 2屬性
+	2. IP address、Route等Layer3屬性
+	3. 設定完成後可能需要更新的Layer3屬性。如static、DHCP、PPPoE等。
+
+`Interface`表示一個高級配置應用於一個或多個`Device`上
+
+----------------
+<h2 id="inter_set">Interface setting</h2>
 在UCI下顯示:
 ```
 network.lan=interface
@@ -52,7 +93,8 @@ config 'interface' 'wan'
         option 'proto' 'dhcp'
         option 'ifname' 'eth0.2'
 ```
-### Proto欄位選項
+-------------
+<h2 id="proto_feild">Proto欄位選項</h2>
 
 | Proto | Description |
 | :--- | :---------- |
@@ -65,6 +107,8 @@ config 'interface' 'wan'
 |3g|第三代行動通訊協定|
 |...|etc|
 |none|未指定的protocol 忽略其他的interface設定，相當於disable|
+
+
 
 根據interface protocol，可能還需要聲明以下參數
 
@@ -80,6 +124,18 @@ config 'interface' 'wan'
 |mtu|number|none|覆寫MTU|
 |auto|bool|proto為none時0，其他1|指定是否在啟動時創建interface|
 |ipv6|bool|1|是否套用ipv6|
+
+-------------
+## 問題清單
+
+<h3 id="Def_C">Default Config是如何生成的?</h2>
+
+Ans: `/lib/functions/uci-default.sh`會生成default的config，且同資料夾下的腳本為其library。
+```bash
+root@LEDE:~# ls /lib/functions/
+fsck             network.sh       procd.sh         system.sh
+leds.sh          preinit.sh       service.sh       uci-defaults.sh
+```
 
 
 
