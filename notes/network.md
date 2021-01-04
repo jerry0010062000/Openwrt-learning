@@ -4,10 +4,11 @@
 
 > 本文摘自 https://openwrt.org/docs/guide-user/base-system/basic-networking 並省略了一些細節
 > 
-+ 筆記內容
++ Netifd設計
 	- [Config reload](#CF_reload)
 	- [Netifd - Device](#Dev)
 	- [Netifd - Interface](#itf)
++ Netifd配置參數
 	- [Netifd - interface setting](#inter_set)
 	- [Netifd - protocol setting](#proto_feild)
 + 問題清單
