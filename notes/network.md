@@ -64,7 +64,7 @@ Device依照up/down進行refcounter管理。調用`claim_device()`
 ----------------
 <h2 id="inter_set">Interface setting</h2>
 在UCI下顯示:
-```bash
+```
 network.lan=interface
 network.lan.type='bridge'
 network.lan.ifname='eth0.1'
