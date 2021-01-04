@@ -73,7 +73,9 @@ network.lan.netmask='255.255.255.0'
 network.lan.ip6assign='60'
 network.lan.ipaddr='192.168.1.1'
 ```
+--------
 在Config File裡:
+
 ```
 config interface 'lan'
         option type 'bridge'
