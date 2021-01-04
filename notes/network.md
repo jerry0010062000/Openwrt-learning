@@ -26,6 +26,8 @@
 + udhcpc `/usr/share/udhcpc/default.script`
 + netifd deamon `/sbin/netifd`
 
+<div align=center><img src="image/netifd-config.png" width="" height="" alt="init-proc"/></div>
+
 --------------
 <h2 id="CF_reload">Config reload</h2>
 
