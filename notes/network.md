@@ -12,6 +12,7 @@
 + Netifd配置參數
 	- [Netifd - interface setting](#inter_set)
 	- [Netifd - protocol setting](#proto_feild)
++ [Ubus object](#ubus)
 + 問題清單
 	- [Default config是怎麼生成的?](#Def_C)
 	- Device與Interface之間的差別?
@@ -150,6 +151,23 @@ config 'interface' 'wan'
 |ipv6|bool|1|是否套用ipv6|
 
 -------------
+<h3 id="ubus">UBUS object</h2>
+僅列出常用的ubus object method
+
+|Path|Procedure|Description|
+|---|---|--------------|
+|network|restart|重新啟動netifd|
+|network|reload|重新讀取相關config|
+|network.device|status|顯示所有Device設定|
+|network.device|set_state||
+|network.interface.name|up|啟動interface|
+|network.interface.name|down|關閉interface|
+|network.interface.name|status|顯示該interface相關設置|
+|network.interface.name|prepare|準備啟動interface|
+|network.interface.name|add_device|將ifname新增給該interface|
+|network.interface.name|add_device|將ifname從此interface移除掉|
+
+-----------------
 ## 問題清單
 
 <h3 id="Def_C">Default Config是如何生成的?</h2>
@@ -160,8 +178,11 @@ root@LEDE:~# ls /lib/functions/
 fsck             network.sh       procd.sh         system.sh
 leds.sh          preinit.sh       service.sh       uci-defaults.sh
 ```
+<h3>Device 與 Interface 的區別?</h2>
 
+<h3>Config如何改變且在何時何處reload?</h2>
 
+<h3>Config如何改變且在何時何處reload?</h2>
 
 
 
