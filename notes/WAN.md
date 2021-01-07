@@ -2,7 +2,7 @@
 
 ### bridge mode
 
->https://openwrt.org/docs/guide-user/network/wan/bridge-mode
+>[Openwrt手冊-bridge mode](https://openwrt.org/docs/guide-user/network/wan/bridge-mode)
 
 橋接模式是一種特殊的操作模式，將當前的gateway/modem當成bridge，將所有traffic轉發到下游設備，防火牆的橋接模式是由kmod-br-netfilter模組提供
 
