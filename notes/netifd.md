@@ -62,8 +62,7 @@ setup_switch() {
 	config_foreach setup_switch_dev switch
 }
 ```
-config_foreach最後執行 `swconfig`
-https://openwrt.org/docs/techref/swconfig
+config_foreach最後執行 `swconfig`[swconfig詳細](https://openwrt.org/docs/techref/swconfig)
 
 
 -------------------------
@@ -282,7 +281,7 @@ netifd在初始化時會向ubusd註冊object:`network`、(後面省略network.)`
 
 <h3 id="Def_C">Default Config是如何生成的?</h2>
 
-> 參考 https://blog.csdn.net/agave7/article/details/106521630
+> 參考[這裡]( https://blog.csdn.net/agave7/article/details/106521630)
 
 
 ### ANS:
