@@ -227,6 +227,7 @@ config 'interface' 'wan'
         option 'proto' 'dhcp'
         option 'ifname' 'eth0.2'
 ```
+
 -------------
 <h2 id="proto_feild">Proto欄位選項</h2>
 
@@ -261,6 +262,7 @@ config 'interface' 'wan'
 
 -------------
 <h3 id="ubus">UBUS object & method</h2>
+
 netifd在初始化時會向ubusd註冊object:`network`、(後面省略network.)`device`、`wireless`、`interface`。
 |Path|Procedure|Description|
 |---|---|--------------|
