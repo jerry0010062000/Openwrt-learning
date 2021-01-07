@@ -5,6 +5,9 @@
 > 參考自 
 > https://openwrt.org/docs/guide-user/base-system/basic-networking 
 > https://code.fe80.eu/openwrt/netifd/-/blob/master/DESIGN
+> https://openwrt.org/docs/guide-user/base-system/basic-networking
+
+
 + Netifd設計
 	- [Netifd 組成](#consist)
 	- [Config reload](#CF_reload)
