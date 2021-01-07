@@ -49,6 +49,19 @@ service network reload
 ```
 
 
+在init.d腳本中，reload時須先執行`init_switch`->`setup_switch`，定義在`/lib/network/switch.sh`
+
+```sh
+setup_switch() {
+	config_load network      # 读取 /etc/config/network ,config_load 在/lib/functions.sh 中定义
+	config_foreach setup_switch_dev switch
+}
+```
+config_foreach最後執行 `swconfig`
+https://openwrt.org/docs/techref/swconfig
+
+
+-------------------------
 <h2 id="Dev">Device</h2>
 
 在`netifd`中定義了三個level:`Device`、 `interface`、 `proto handler` 
@@ -162,6 +175,20 @@ enum interface_state {
 };
 ```
 #### Interface API
+```C
+struct interface *interface_alloc(const char *name, struct blob_attr *config);
+void interface_add(struct interface *iface, struct blob_attr *config);
+void interface_set_proto_state(struct interface *iface, struct interface_proto_state *state);
+int interface_set_up(struct interface *iface);
+int interface_set_down(struct interface *iface);
+void interface_set_main_dev(struct interface *iface, struct device *dev);
+void interface_set_l3_dev(struct interface *iface, struct device *dev);
+void interface_add_user(struct interface_user *dep, struct interface *iface);
+void interface_remove_user(struct interface_user *dep);
+int interface_add_link(struct interface *iface, struct device *dev);
+int interface_remove_link(struct interface *iface, struct device *dev);
+int interface_handle_link(struct interface *iface, const char *name, bool add);
+```
 
 ----------------
 <h2 id="inter_set">Interface setting範例</h2>
@@ -232,8 +259,6 @@ config 'interface' 'wan'
 -------------
 <h3 id="ubus">UBUS object & method</h2>
 netifd在初始化時會向ubusd註冊object:`network`、(後面省略network.)`device`、`wireless`、`interface`。
-
-
 |Path|Procedure|Description|
 |---|---|--------------|
 |network|restart|重新啟動netifd|
@@ -257,7 +282,7 @@ netifd在初始化時會向ubusd註冊object:`network`、(後面省略network.)`
 
 ### ANS:
 ```bash
-第一部分：生成 /etc/board.json
+第一部分：在preinit階段生成 /etc/board.json
 /etc/preinit
 -> /lib/preinit/10_indicate_preinit    
    preinit_ip
@@ -275,19 +300,14 @@ netifd在初始化時會向ubusd註冊object:`network`、(後面省略network.)`
      generate_static_network
      uci commit
 ```
+network配置文件生成依賴於`board.json`
+/etc/board.json內容由/etc/board.d/02_network決定，所以要修改default只要修改`02_network`
 
-`/lib/functions/uci-default.sh`會生成default的config，且同資料夾下的腳本為其library。
-
-```bash
-root@LEDE:~# ls /lib/functions/
-fsck             network.sh       procd.sh         system.sh
-leds.sh          preinit.sh       service.sh       uci-defaults.sh
-```
 <h3>Device 與 Interface 的區別?</h2>
 
 <h3>Config如何改變且在何時何處reload?</h2>
 
-<h3>Config如何改變且在何時何處reload?</h2>
+
 
 
 
