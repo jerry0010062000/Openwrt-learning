@@ -26,6 +26,8 @@
 ## Netifd是什麼?
 他是在openwrt中用來進行網路配置的daemom process，基本上所有的netlink皆可以由netifd完成，在啟動netifd之前用戶必須先將所需設定寫入uci的 `/etc/config/network`中，來告知如何配置這些接口。
 
+*netlink是一種user process與kernel process通訊的一種特殊IPC，詳細: [Netlink](https://www.jianshu.com/p/6810f42b9f8f)
+
 ---------------------------------------------
 <h2 id="consist">Netifd 組成</h2>
 
