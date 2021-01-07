@@ -1,5 +1,10 @@
 # Hotplug 
 
+
+
+> linux的統一設備模型(可找時間看) ) https://www.binss.me/blog/sysfs-udev-and-Linux-Unified-Device-Model/
+> openwrt中節點的自動創建 https://blog.csdn.net/agave7/article/details/96181789
+
 當某些event發生時(例如interface up or down、偵測到新的儲存驅動或按紐事件)，procd將依照腳本開頭的數字大小依序執行 `/etc/hotplug.d`下的腳本
 
 |資料夾|Description|
@@ -29,4 +34,9 @@ cat << "EOF" > /etc/hotplug.d/iface/99-my-action
 } 
 EOF
 ```
+
+
+
+
+
 

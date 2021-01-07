@@ -1,25 +1,30 @@
-# Network (/etc/config/network)
+# Netifd (/etc/config/network)
 
 ---------------------------
 
-> 本文摘自 https://openwrt.org/docs/guide-user/base-system/basic-networking 並省略了一些細節
-> 
+> 參考自 
+> https://openwrt.org/docs/guide-user/base-system/basic-networking 
+> https://code.fe80.eu/openwrt/netifd/-/blob/master/DESIGN
 + Netifd設計
-	- [Netifd consist](#consist)
+	- [Netifd 組成](#consist)
 	- [Config reload](#CF_reload)
 	- [Netifd - Device](#Dev)
 	- [Netifd - Interface](#itf)
 + Netifd配置參數
 	- [Netifd - interface setting](#inter_set)
 	- [Netifd - protocol setting](#proto_feild)
-+ [Ubus object](#ubus)
++ [Ubus Object & Method](#ubus)
 + 問題清單
 	- [Default config是怎麼生成的?](#Def_C)
 	- Device與Interface之間的差別?
 	- Config如何改變且在何時何處reload?
 	- Device和Interface的state machine?
 -----------------------------------------------
-<h2 id="consist">Netifd consist</h2>
+## Netifd是什麼?
+他是在openwrt中用來進行網路配置的daemom process，基本上所有的netlink皆可以由netifd完成，在啟動netifd之前用戶必須先將所需設定寫入uci的 `/etc/config/network`中，來告知如何配置這些接口。
+
+---------------------------------------------
+<h2 id="consist">Netifd 組成</h2>
 
 + Shell腳本 `/sbin/ifup`、`/sbin/ifdown`、`/sbin/ifstatus`、`/sbin/devstatus` 
 + init.d腳本 `/etc/init.d/network`
@@ -42,7 +47,6 @@ service network reload
 ```bash
 /etc/init.d/network reload
 ```
-
 
 
 <h2 id="Dev">Device</h2>
@@ -75,17 +79,92 @@ Device依照up/down進行refcounter管理。調用`claim_device()`
 
 `Interface`表示一個高級配置應用於一個或多個`Device`上。Interface必須被配置到一個主要Device上。在Default下，Layer3設備只需要被映射到簡單配置的protocol上，例如: static、DHCP等，更複雜的protocol，如pptp或VPN才需要新映射到外部模組上。
 
-Interface state訊息如下:
-|EVENT|DESCRIPTION|
-|---|----------------|
-|IFS_SETUP|此interface正在被proto handler配置中|
-|IFS_UP|Interface成功被配置|
-|IFS_TEARDOWN|interface準備取消配置|
-|IFS_DOWN|interfac已取消配置|
+#### Interface structure如下:
+```C
+struct interface {
+    struct vlist_node node;
+    struct list_head hotplug_list;
+    enum interface_event hotplug_ev;
 
+    const char *name;
+    const char *ifname;
+
+    bool available;
+    bool autostart;
+    bool config_autostart;
+    bool device_config;
+    bool enabled;
+    bool link_state;
+    bool force_link;
+    bool dynamic;
+
+    time_t start_time;
+    enum interface_state state;
+    enum interface_config_state config_state;
+    enum interface_update_flags updated;
+
+    struct list_head users;
+
+    const char *parent_ifname;
+    struct interface_user parent_iface;
+
+    /* main interface that the interface is bound to */
+    struct device_user main_dev;
+
+    /* interface that layer 3 communication will go through */
+    struct device_user l3_dev;
+
+    struct blob_attr *config;
+
+    /* primary protocol state */
+    const struct proto_handler *proto_handler;
+    struct interface_proto_state *proto;
+
+    struct interface_ip_settings proto_ip;
+    struct interface_ip_settings config_ip;
+    struct vlist_tree host_routes;
+
+    int metric;
+    unsigned int ip4table;
+    unsigned int ip6table;
+
+    /* IPv6 assignment parameters */
+    uint8_t assignment_length;
+    int32_t assignment_hint;
+    struct list_head assignment_classes;
+
+    /* errors/warnings while trying to bring up the interface */
+    struct list_head errors;
+
+    /* extra data provided by protocol handlers or modules */
+    struct avl_tree data;
+
+    struct uloop_timeout remove_timer;
+    struct ubus_object ubus;
+};
+```
+
+#### Interface state訊息如下:
+```C
+enum interface_event {
+    IFEV_DOWN,
+    IFEV_UP,
+    IFEV_UPDATE,
+    IFEV_FREE,
+    IFEV_RELOAD,
+};
+
+enum interface_state {
+    IFS_SETUP,		//此interface正在被proto handler配置中
+    IFS_UP,			//Interface成功被配置
+    IFS_TEARDOWN,	//Interface準備取消配置
+    IFS_DOWN,		//Interfac已取消配置
+};
+```
+#### Interface API
 
 ----------------
-<h2 id="inter_set">Interface setting</h2>
+<h2 id="inter_set">Interface setting範例</h2>
 在UCI下顯示:
 
 ```
@@ -151,8 +230,9 @@ config 'interface' 'wan'
 |ipv6|bool|1|是否套用ipv6|
 
 -------------
-<h3 id="ubus">UBUS object</h2>
-僅列出常用的ubus object method
+<h3 id="ubus">UBUS object & method</h2>
+netifd在初始化時會向ubusd註冊object:`network`、(後面省略network.)`device`、`wireless`、`interface`。
+
 
 |Path|Procedure|Description|
 |---|---|--------------|
@@ -172,7 +252,32 @@ config 'interface' 'wan'
 
 <h3 id="Def_C">Default Config是如何生成的?</h2>
 
-Ans: `/lib/functions/uci-default.sh`會生成default的config，且同資料夾下的腳本為其library。
+> 參考 https://blog.csdn.net/agave7/article/details/106521630
+
+
+### ANS:
+```bash
+第一部分：生成 /etc/board.json
+/etc/preinit
+-> /lib/preinit/10_indicate_preinit    
+   preinit_ip
+   -> preinit_config_board
+     -> /bin/board_detect /tmp/board.json
+       -> /etc/board.d/02_network
+         -> /lib/functions/uci-defaults.sh
+         -> board_config_flush 
+           -> mv /tmp/.board.json ${CFG}
+-------------------------------------------------------          
+第二部分，根据/etc/board.json 中的network节点 生成 /etc/config/network
+/etc/init.d/boot 
+-> /bin/config_generate
+  -> touch /etc/config/network 
+     generate_static_network
+     uci commit
+```
+
+`/lib/functions/uci-default.sh`會生成default的config，且同資料夾下的腳本為其library。
+
 ```bash
 root@LEDE:~# ls /lib/functions/
 fsck             network.sh       procd.sh         system.sh
