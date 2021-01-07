@@ -4,8 +4,7 @@
 
 > 參考自 
 > [Netifd Design手冊](https://code.fe80.eu/openwrt/netifd/-/blob/master/DESIGN)
->
-> [Openwrt手冊-basic networking](https://openwrt.org/docs/guide-user/base-system/basic-networking)
+>、[Openwrt手冊-basic networking](https://openwrt.org/docs/guide-user/base-system/basic-networking)
 
 
 + Netifd設計
