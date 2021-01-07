@@ -1,11 +1,17 @@
 # Hotplug 
 
+> [linux的統一設備模型](https://www.binss.me/blog/sysfs-udev-and-Linux-Unified-Device-Model/)
+> [openwrt中設備節點的自動創建](https://blog.csdn.net/agave7/article/details/96181789)
+> 參考自[OpenWRT Hotplug原理分析](https://github.com/wywincl/hotplug)
 
+Procd屬於user space process，與uevent所屬的kernel space必須透過netlink傳遞訊息
+1. kernel發出uevent
+	uevent首先調用`netlink_kernel_create()`創建socket，`kobject_uevent()`產生uevent事件，事件的部分訊息透過環境參數傳達(如`$ACTION`,`$DEVPATH`)，產生的uevent由`netlink_broadcast_filtered()`發出，最後依照`uevent_helper[]`指定的程式來完成
 
-> linux的統一設備模型(可找時間看) ) https://www.binss.me/blog/sysfs-udev-and-Linux-Unified-Device-Model/
-> openwrt中節點的自動創建 https://blog.csdn.net/agave7/article/details/96181789
-
-當某些event發生時(例如interface up or down、偵測到新的儲存驅動或按紐事件)，procd將依照腳本開頭的數字大小依序執行 `/etc/hotplug.d`下的腳本
+2. user監聽
+	在`proc/plug/hotplug.c`中，創建PF_NETLINK socket來監聽uevent，收到後根據`/etc/hotplug.json`來執行對應的函數。通常情況下，會調用`/sbin/hotplug-call`來處理，他根據`$SUBSYSTEM`分別執行`/etc/hotplug.d`下的腳本。
+	
+### /etc/hotplug.d/
 
 |資料夾|Description|
 |---|------|
@@ -13,7 +19,7 @@
 |button|按鍵事件，/etc/rc.button產生|
 |iface|interface events(LAN、WAN連線)|
 |net|網路相關事件|
-|ntp|同步時間是件|
+|ntp|同步時間事件|
 |usb|USB裝置(3g-modem、tty)|
 
 在執行hotplug腳本時，procd利用環境變數來提供大量訊息
