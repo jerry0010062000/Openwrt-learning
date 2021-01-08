@@ -1,7 +1,7 @@
 # Hotplug 
 
-> [linux的統一設備模型](https://www.binss.me/blog/sysfs-udev-and-Linux-Unified-Device-Model/)
-> [openwrt中設備節點的自動創建](https://blog.csdn.net/agave7/article/details/96181789)
+> [linux的統一設備模型](https://www.binss.me/blog/sysfs-udev-and-Linux-Unified-Device-Model/)、
+> [openwrt中設備節點的自動創建](https://blog.csdn.net/agave7/article/details/96181789)，
 > 參考自[OpenWRT Hotplug原理分析](https://github.com/wywincl/hotplug)
 
 Procd屬於user space process，與uevent所屬的kernel space必須透過netlink傳遞訊息
