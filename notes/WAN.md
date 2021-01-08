@@ -7,6 +7,9 @@
 	- [PPPoA](#pppoa)
 	- [PPP on 3g](#3g)
 + USB modem
+	- [QMI](#qmi)
+	- [NCM](#ncm)
+	
 
 ### bridge mode
 
@@ -97,7 +100,7 @@ PAP用於驗證遠端帳密是否正確 ，CHAP則是確定可連線後，認證
 ----------------
 ## USB Modem
 
-### QMI
+<h2 id="qmi">QMI</h2>
 
 > The package comgt-ncm + modem specific driver must be installed to use NCM.
 > 
@@ -114,7 +117,8 @@ PAP用於驗證遠端帳密是否正確 ，CHAP則是確定可連線後，認證
 
 -----------------------------
 
-## NCM
+<h2 id="ncm">NCM</h2>
+
 > [參考這裡](https://wowothink.com/588ebc22/)
 > The package comgt-ncm + modem specific driver must be installed to use NCM
 
