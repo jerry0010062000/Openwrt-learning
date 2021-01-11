@@ -20,9 +20,24 @@
 
 >[原文](https://opengers.github.io/openstack/openstack-base-virtual-network-devices-bridge-and-vlan/#linux-bridge)
 
-Bridge是Linux上工作在第二層的虛擬Switch，依靠軟體實現，與普通第二層功能相同。可以添加網路設備(em0,eth0,tap...)到Bridge上。在Bridge中會維護一個類似物理交換機的MAC address表，來達成數據轉發的功能。  與物理Switch不同的是，運行Bridge的Linux本身需要IP位址和其他通訊設備，但分配到bridge上的網卡是不能配置IP的(因為工作在第二層)，
-
- Bridge本身是可以被分配IP的，一旦被分配了IP，就意味著Bridge可以作為Router interface，如下圖。
+Bridge是Linux上工作在第二層的虛擬Switch，依靠軟體實現，與普通第二層功能相同。可以添加網路設備(em0,eth0,tap...)到Bridge上。在Bridge中會維護一個類似物理交換機的MAC address表，來達成數據轉發的功能。  與物理Switch不同的是，運行Bridge的Linux本身需要IP位址和其他通訊設備，但分配到bridge上的網卡是不能配置IP的(因為工作在第二層)，而 Bridge本身是可以被分配IP的，一旦被分配了IP，就意味著Bridge可以作為Router interface，如下圖。
 
 <div align=center><img src="image/bridge-path.png" width="" height="" alt="br-path.png"/></div>
+
+上圖主機中有em1、em2兩張實體網卡，bridge `br0`，VPN、虛擬機`qemu-kvm`。
+
+1. Bridge處理封包流程
+   - 封包從外部網路(A)發往虛擬機(P2)過程，首先封包從em2(B)物理網卡進入，之後em2將封包轉發給vlan子設備em2.100，經過bridge check(L)發現子設備em2.100屬於Bridge設備，因此封包不會往上層協議發送(T)，而是進入Bridge內處理，封包從em2.100進入br0，經過`bridging decision`發現封包應該從`tap0(E)`發出，此時離開主機網路協議，發往被user process打開的設備(N)，最終qemu-kvm讀取數據。在此過程中，A發出的封包不會經過上層協議。
+
+2. Bridging decision
+上圖`br0`收到封包後，根據目的地MAC的不同，Bridging decision有不同的決定:
+	- 目的MAC為br0本身，收到發往主機的封包，往上層送(D->J)
+	- 廣播，轉送到br0上所有interface(br0,tap0,tap1,...)
+	- 目的存在MAC表中，查表到對應接口(D->E)
+	- 目的不存在MAC表中，flooding到所有接口(br0,tap0,tap1,...)
+	- IP address不是br0,橋不處理，直接轉送給上層。
+
+3. VLAN
+
+   VLAN又稱虛擬網路，其原理是在第二層協議中插入額外的VLAN數據，同時保持和傳統二層設備的兼容性。VLAN設備的作用是建立一個個帶不同vlan tag的子設備，他並不能建立多個可以交換轉發數據的接口，因此需要借助bridge，把VLAN建立的子設備(eg.em2.100)橋接到br0上
 
