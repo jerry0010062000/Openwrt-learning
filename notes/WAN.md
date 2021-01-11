@@ -58,6 +58,7 @@ PAP用於驗證遠端帳密是否正確 ，CHAP則是確定可連線後，認證
 
 ------------
 <h2 id="pppoa">PPPoA</h2>
+
 > The package ppp-mod-pppoa must be installed to use PPPoA.
 > 
 
@@ -83,6 +84,7 @@ PAP用於驗證遠端帳密是否正確 ，CHAP則是確定可連線後，認證
 --------------------
 
 <h2 id="3g">3g</h2>
+
 #### PPP over EV-DO,CDMA,UMTS,GPRS
 
 > The package comgt must be installed to use 3G.
