@@ -15,6 +15,11 @@
 
   如果以公路作為比喻，互聯網就是高速公路，Modem 就是高速公路的一個出入口，而 Router 就是通過出入口之後的網路交匯處，互聯網的訊號就是通過以上的路徑，最終去到目的地即是我們的電腦及手機等裝置。
 
+---------------------------
+### Linux Bridge
+Bridge是Linux上工作在第二層的虛擬Switch，依靠軟體實現，與普通第二層功能相同。可以添加網路設備(em0,eth0,tap...)到Bridge上。在Bridge中會維護一個類似物理交換機的MAC address表，來達成數據轉發的功能。  與物理Switch不同的是，運行Bridge的Linux本身需要IP位址和其他通訊設備，但分配到bridge上的網卡是不能配置IP的(因為工作在第二層)，
 
-+ vLAN 虛擬網路
+ Bridge本身是可以被分配IP的，一旦被分配了IP，就意味著Bridge可以作為Router interface，如下圖。
+
+<div align=center><img src="image/bridge-path.png" width="" height="" alt="br-path.png"/></div>
 
