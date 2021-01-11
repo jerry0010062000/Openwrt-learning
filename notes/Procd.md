@@ -81,5 +81,16 @@ procd_set_param					#設定instance參數
 procd_close_intsance			#結束定義instance
 ```
 
+參數列表
+|Parv|Type|Description|
+|---|---|-----------|
+|env|key-value list|設定環境參數key=value給產生出的process|
+|data|key-value list|設置給ubus service status，主要用於儲存額外meta data服務|
+|limits|key-value list|設置資源限制|
+|command|list|設置vector來啟動程式|
+|netdev|list|將linux網路設備名稱給procd以監視改變，當啟動reload時，如果network device interface index有被改變時，傳遞信號|
+|file|list|將文件名給procd監控，當reload時檢查到checksum被改變時向其傳遞信號|
+|respawn|list|三個數字用空格隔開，分別代表重啟秒數
+
 
 
