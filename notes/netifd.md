@@ -18,7 +18,6 @@
 + [Ubus Object & Method](#ubus)
 + 問題清單
 	- [Default config是怎麼生成的?](#Def_C)
-	- Device與Interface之間的差別?
 	- Config如何改變且在何時何處reload?
 	- Device和Interface的state machine?
 -----------------------------------------------
@@ -308,9 +307,8 @@ netifd在初始化時會向ubusd註冊object:`network`、(後面省略network.)`
 network配置文件生成依賴於`board.json`
 /etc/board.json內容由/etc/board.d/02_network決定，所以要修改default只要修改`02_network`
 
-<h3>Device 與 Interface 的區別?</h2>
 
-<h3>Config如何改變且在何時何處reload?</h2>
+<h2>Config如何改變且在何時何處reload?</h2>
 
 
 
