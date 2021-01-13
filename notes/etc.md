@@ -15,6 +15,25 @@
 
   如果以公路作為比喻，互聯網就是高速公路，Modem 就是高速公路的一個出入口，而 Router 就是通過出入口之後的網路交匯處，互聯網的訊號就是通過以上的路徑，最終去到目的地即是我們的電腦及手機等裝置。
 
+-------------------
+
+## MAC address的唯一性
+MAC address一共占用6個bytes(48bit)，以16進制顯示，ex:
+```
+6e:77:0f:b8:8b:6b
+```
+IEEE為了保證其唯一性將前24位做為廠商標示符（Organizationally Unique Identifier，OUI），後面的24位才是序列號
+<div align=center><img src="image/mac-address.png" width="" height="" alt="mac-address.png"/></div>
+
+--------------------
+
+### kernel space & user space
+
+process指令從user space切換到kernel space時會經過context switch
+<div align=center><img src="image/context-exchange.png" width="" height="" alt="context-exchange.png"/></div>
+
+現代CPU都具有不同的操作模式，不同的級別有不同的功能，其擁有資源也不盡相同，Linux在系統設計時也利用這個特性，分出了最高級(kernel)和最低級別(user)，kernel和user擁有各自的memory space，所以必須經過context switch
+
 ---------------------------
 ### Linux Bridge
 
@@ -27,8 +46,9 @@ Bridge是Linux上工作在第二層的虛擬Switch，依靠軟體實現，與普
 上圖主機中有em1、em2兩張實體網卡，bridge `br0`，VPN、虛擬機`qemu-kvm`。
 
 1. Bridge處理封包流程
-   - 封包從外部網路(A)發往虛擬機(P2)過程，首先封包從em2(B)物理網卡進入，之後em2將封包轉發給vlan子設備em2.100，經過bridge check(L)發現子設備em2.100屬於Bridge設備，因此封包不會往上層協議發送(T)，而是進入Bridge內處理，封包從em2.100進入br0，經過`bridging decision`發現封包應該從`tap0(E)`發出，此時離開主機網路協議，發往被user process打開的設備(N)，最終qemu-kvm讀取數據。在此過程中，A發出的封包不會經過上層協議。
-
+   
+- 封包從外部網路(A)發往虛擬機(P2)過程，首先封包從em2(B)物理網卡進入，之後em2將封包轉發給vlan子設備em2.100，經過bridge check(L)發現子設備em2.100屬於Bridge設備，因此封包不會往上層協議發送(T)，而是進入Bridge內處理，封包從em2.100進入br0，經過`bridging decision`發現封包應該從`tap0(E)`發出，此時離開主機網路協議，發往被user process打開的設備(N)，最終qemu-kvm讀取數據。在此過程中，A發出的封包不會經過上層協議。
+  
 2. Bridging decision
 上圖`br0`收到封包後，根據目的地MAC的不同，Bridging decision有不同的決定:
 	- 目的MAC為br0本身，收到發往主機的封包，往上層送(D->J)
@@ -41,3 +61,20 @@ Bridge是Linux上工作在第二層的虛擬Switch，依靠軟體實現，與普
 
    VLAN又稱虛擬網路，其原理是在第二層協議中插入額外的VLAN數據，同時保持和傳統二層設備的兼容性。VLAN設備的作用是建立一個個帶不同vlan tag的子設備，他並不能建立多個可以交換轉發數據的接口，因此需要借助bridge，把VLAN建立的子設備(eg.em2.100)橋接到br0上
 
+----------------
+
+### VLAN
+
+> [參考這篇](https://blog.csdn.net/zqixiao_09/article/details/79180214)
+> 
+
+根據IEEE802.1Q標準定義了VLAN HEADER格式，其在Frame header SRC Addr後，帶vlan的switch port分為兩種
+1. Access port
+	這些port被打上了vlan tag，離開switch的Access port的header不會有vlan tag的存在。
+2. Trunk port
+	在多個switch的狀況下，需要有一條線連接兩個switch，連接的port稱為trunk port，離開和進入都會保留vlan tag。
+	
+
+配置了vlan的switch比傳統switch多了以下機制:
+1. MAC表格中每行有不同的VLAN ID，做比較時會拿Frame的MAC addr和VLAN ID進行比對
+2. 如果沒有吻合的選項，則從所有相同VLAN ID的port和 Trunk轉發出去。
