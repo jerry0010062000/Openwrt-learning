@@ -1,32 +1,48 @@
 # Procd
 ==========================================================
 
++ [什麼是Procd?](#introduction)
++ [Procd初始化流程](#init)
+	- [初始化_preinit階段](#preinit)
+	- [初始化_procd正式啟動與inittab](#procd_state)
++ [自製init腳本](#DIY)
+	- 
 
-* 主要功能
-  * [開機時執行初始](#init)
-  * [檢查config是否變化](#reload_config)
-  * 維護process、接收request、增減process
-  * [procd.sh](#procd_sh)
+----------------------------------
+<h3 id="introduction">Procd是什麼?</h3>
+
+Procd是一個用C語言編寫的守護行程(daemon)，他持續追蹤那些透過init script啟動的process，並在config/environment改變時啟動或重啟服務。
 
 ----------------------------------------------------------------------------------------------
 <h3 id="init">系統開機流程</h3>
+Openwrt從kernel_start()完成後，執行preinit和init到Procd取代流程如下:
 <div align=center><img src="image/init-img.png" width="" height="" alt="init-proc"/></div>
-		參考自:https://dongshao.blog.csdn.net/article/details/102767797
+> [參考自這裡](https://dongshao.blog.csdn.net/article/details/102767797)
 
 ---------------------------------------------------------------------------------------------
+<h2 id="preinit">初始化_preinit階段</h2>
 
-### 在Init中總共創建出三支子程式執行任務 分別是 `kmodloader` `procd` `preinit.sh` 
+雖然kernel啟動結束後會先執行preinit.sh，但由於變數尚未設定，會直接執行init主要動作如下
+	- bring up basic mounts如 /proc /sys /dev
+	- 創建一些必須的資料夾如 /tmp
+	- bring up /dev/console並打印消息
+	- 設置PATH環境變數
+	- 檢查init_debug是否被設置
+	- 初始化watchdog
 
-* Kmodloader維護了一個AVL tree並執行了以下動作
+接著Init總共創建出三支子程式執行任務 分別是 `kmodloader` `procd` `preinit.sh` 
+
++ Kmodloader維護了一個AVL tree並執行了以下動作
+
   - 開啟`/proc/modules`文件中記錄已安裝的模組插入AVL tree中並設為LOADED
   - 掃描`/lib/modules/核心版本/*.ko`判斷外部模組是否在AVL中，否則加入並設為SCANNED
   - 掃描`/etc/modules-boot.d/`將數字開頭的檔案由小到大循序載入，其他設為PROBE
 
-* 在Init中 fork出來的procd代入參數`/etc/hotplug-preinit.json`執行兩項檢測動作
++ 在Init中 fork出來的procd代入參數`/etc/hotplug-preinit.json`執行兩項檢測動作
   - 韌體升級uevent 執行腳本`/sbin/hotplug-call`加載`/lib/firmware`下的升級
   - 判斷uevent "SUBSYSTEM"為button，執行`/etc/rc.bottom/failsafe`建立檔案`/tmp/failsafe-button`
 
-* preinit.sh定義了五個hook後執行`/lib/preinit/`目錄下腳本，每個腳本定義了一個function並且將其掛到五個hook上，分別是:
++ preinit.sh定義了五個hook後執行`/lib/preinit/`目錄下腳本，每個腳本定義了一個function並且將其掛到五個hook上，分別是:
 ```bash
 >#hook
 >preinit_essential
@@ -53,35 +69,59 @@
 ```
 實際上只執行`preinit_essential`和 `preinit_main`
 
+如果沒有進入failsafe模式的話，結束`preinit.sh`回到init，執行callback function結束init，由procd取代他，成為pid = 1的process。
+
 ---------------------
 
+<h2 id="procd_state">初始化_procd正式啟動與inittab</h2>
 
-<h3 id="reload_config">Reload_config</h3>
+---------------------
 
+<h2 id= "DIY">如何製作init腳本</h2>
 
+必須放在`/etc/init.d/`
+init腳本模板由rc.common提供，需在script前加上
+```shell
+#!/bin/sh /etc/rc.common
+USE_PROCD=1
+```
+此腳本用途主要在，定義啟動instacnce時所需配置，以及定義重新啟動服務
 
-<h3 id="procd_sh">Procd.sh</h3>
-由於使用ubus method必須使用json格式，容易出錯，procd.sh將其封裝成函數
+## rc.common定義函數
 
-```bash
-procd_open_trigger				#開始定義一組trigger
-procd_close_trigger				#結束定義trigger
-procd_add_reload_trigger		#定義關注的config，當reload_config後如果關注的檔案被修改則觸發reload_service()
+|Function|Description|
+|-----|--------------------|
+|start_service()|向Procd註冊並啟動服務|
+|stop_service()|停止正在運行的服務|
+|service_trigger()|config或interface改變時觸發重新讀取|
+|service_runnung()|查詢服務狀態|
+|reload_service()|如果定義此函數，trigger時啟動此函數，否則調用start|
+|service_started|判斷process是否啟動成功|
+
+### trigger函數使用方法
+```c
+service_triggers()
+{
+        procd_add_reload_trigger "<uci-file-name>" "<second-uci-file>"
+        procd_add_reload_interface_trigger <interface>
+}
+```
+兩者皆使用`/etc/init.d/<foo> reload`作為handler
+
+openwrt也支援重啟信號`SIGHUP`傳遞用法如下
+```C
+reload_service() {
+         procd_send_signal service_name [instance_name] [signal]
+}
+//其中service_name為 init.d下腳本名稱
+//instance_name允許自訂義實例名稱，若使用*視為未指定，發給服務所有實例
 ```
 
-```bash
-procd_open_instance				#開始新增一個instance
-procd_set_param					#設定instance參數
-	-command	@啟動的命令
-	-respawn	@意外結束時的重啟機制
-	-env		@環境變數
-	-file		@比較配置文件是否有改變
-	-netdev		@綁定的網路設備
-	-limits		@process的資源限制
-procd_close_intsance			#結束定義instance
-```
 
-參數列表
+----------------
+
+`procd_set_param`可用參數列表
+
 |Parv|Type|Description|
 |---|---|-----------|
 |env|key-value list|設定環境參數key=value給產生出的process|
@@ -90,7 +130,10 @@ procd_close_intsance			#結束定義instance
 |command|list|設置vector來啟動程式|
 |netdev|list|將linux網路設備名稱給procd以監視改變，當啟動reload時，如果network device interface index有被改變時，傳遞信號|
 |file|list|將文件名給procd監控，當reload時檢查到checksum被改變時向其傳遞信號|
-|respawn|list|三個數字用空格隔開，分別代表重啟秒數
-
-
+|respawn|list|三個數字用空格隔開，分別代表重啟秒數--------|
+|watch|list|list ubus namespace ，procd將訂閱他們，當有ubus事件將會比對已註冊的JSON腳本觸發器|
+|error|list||
+|nice|int|設定重啟優先權(最高)-20~19(最低)|
+|term_timeout|int|收到TERM SIGNAL後到完全結束等待秒數，如過時間到還未結束則發出KILL SIGNAL，default=5|
+|stdout|bool|如果為真，procd將生成process的stdout設置到 system log中，LOG_INFO|
 
