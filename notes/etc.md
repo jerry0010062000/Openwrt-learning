@@ -2,7 +2,7 @@
 
 
 +  [雜談](#etc)
-+  [MAC address的唯一性](#MAC ADDR)
++  [MAC address的唯一性](#MAC_ADDR)
 +  [kernel space & user space](#KS_US)
 +  [Linux Bridge](#LINUX_BR)
 +  [VLAN](#VLAN)
@@ -28,7 +28,7 @@
 
 -------------------
 
-<h2 id="MAC ADDR"> MAC address的唯一性</h2>
+<h2 id="MAC_ ADDR"> MAC address的唯一性</h2>
 
 MAC address一共占用6個bytes(48bit)，以16進制顯示，ex:
 ```
