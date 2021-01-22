@@ -1,5 +1,16 @@
 # 無法分類筆記
 
+
++  [雜談](#etc)
++  [MAC address的唯一性](#MAC ADDR)
++  [kernel space & user space](#KS_US)
++  [Linux Bridge](#LINUX_BR)
++  [VLAN](#VLAN)
++  [Linux中的網路虛擬化](#virtual)
++  [Linux Socket](#socket)
+
+<h2 id="etc">雜談</h2>
+
 + Default gateway與Default route的差異
 
   Default Route設定於Layer3環境，而Default Gateway設定於Layer2環境，都是以Layer3的IP進行定址。
@@ -17,7 +28,8 @@
 
 -------------------
 
-## MAC address的唯一性
+<h2 id="MAC ADDR"> MAC address的唯一性</h2>
+
 MAC address一共占用6個bytes(48bit)，以16進制顯示，ex:
 ```
 6e:77:0f:b8:8b:6b
@@ -27,7 +39,7 @@ IEEE為了保證其唯一性將前24位做為廠商標示符（Organizationally 
 
 --------------------
 
-### kernel space & user space
+<h2 id="KS_US"> kernel space & user space</h2>
 
 process指令從user space切換到kernel space時會經過context switch
 <div align=center><img src="image/context-exchange.png" width="" height="" alt="context-exchange.png"/></div>
@@ -35,7 +47,8 @@ process指令從user space切換到kernel space時會經過context switch
 現代CPU都具有不同的操作模式，不同的級別有不同的功能，其擁有資源也不盡相同，Linux在系統設計時也利用這個特性，分出了最高級(kernel)和最低級別(user)，kernel和user擁有各自的memory space，所以必須經過context switch
 
 ---------------------------
-### Linux Bridge
+
+<h2 id="LINUX_BR"> Linux Bridge</h2>
 
 >[原文](https://opengers.github.io/openstack/openstack-base-virtual-network-devices-bridge-and-vlan/#linux-bridge)
 
@@ -63,7 +76,7 @@ Bridge是Linux上工作在第二層的虛擬Switch，依靠軟體實現，與普
 
 ----------------
 
-### VLAN
+<h2 id="VLAN"> VLAN</h2>
 
 > [參考這篇](https://blog.csdn.net/zqixiao_09/article/details/79180214)
 > 
@@ -78,3 +91,70 @@ Bridge是Linux上工作在第二層的虛擬Switch，依靠軟體實現，與普
 配置了vlan的switch比傳統switch多了以下機制:
 1. MAC表格中每行有不同的VLAN ID，做比較時會拿Frame的MAC addr和VLAN ID進行比對
 2. 如果沒有吻合的選項，則從所有相同VLAN ID的port和 Trunk轉發出去。
+
+------------------------
+
+<h2 id="virtual"> Linux中的網路虛擬化</h2>
+
+> [這篇](https://iter01.com/512996.html)
+
+1. Device
+    在linux裡面devic(裝置)與傳統網路概念裡的物理裝置(如交換機、路由器)不同，Linux所說的裝置，其背後指的是一個類似於資料結構、核心模組或裝置驅動這樣的含義。就是說device可能只是軟體系統裡的一個驅動，一個函式介面。
+    
+2. Tap
+    Tap位於二層資料鏈路層，tun位於三層網路層，兩者在linux裡的函式結構幾乎一致，除了一個flag值區分tap/tun。在linux中二層特指乙太網（Ethernet）(傳統網路裡二層分Ethernet,P2P,HDLC,FR,ATM)，因此有時tap也叫“虛擬以太裝置”。有意思的是linux建立tap需要用到tun模組。Linux建立tap/tun都使用tun模組。
+    
+#### packet based 
+乙太網
+|特質|方式|
+|---|---|
+|頻寬Bandwidth|基頻|
+|網路拓樸|匯流排，星狀|
+|線材|同軸電纜(10Base5,10Base2)，雙絞線(10BaseT)，光纖(10BaseF)|
+|傳輸速率|10Mbps|
+|偵測碰撞|CSMA/CD|
+|網路型態|廣播式網路|
+
+
+interface分為兩種
+`physical`和`virtual`
+
+物理interface有`eth0`、`radio0`、`wlan0`等代表實際硬體設備，如NIC、WNIC或其他Modem，一旦將設備驅動載入kernel中便會出現相應interface可供使用。
+每個物理接口都是由作業系統以軟體表示命名的，以便使用者將其寫入腳本中。
+
+virtual interface如`lo`、`eth0.1`、`vlan2`、`br0`、`tun0`...等，他們必須建立在某個物理接口之上(否則無法作用)。
+|類型|表示|描述|
+|---|---|----------------------|
+|aliases|eth4:5|別命是一種過時的方法，用於管理每個接口多個IP address|
+|VLANs|eth4.0|可以將單個layer2網路分成多個虛擬網路|
+|bridges|br0|用於橋接多個虛擬或物理接口，讓它們看起來像一個接口(與VLAN相反)|
+|tunnel interfaces|pppoe-dsl、tun0|用於更改傳出網絡數據包或傳入網絡數據包的順序|
+|wireless vif|wlan0|WNIC物理網路接口|
+
+兩個interface也可以綁在一起(bonded)
+
+--------------
+
+<h2 id="socket"> LINUX SOCKET</h2>
+
+socket是常見的一種process之間的溝通方式（IPC），socket通訊分兩種：
++ Internet domain socket
+	- 這種用於不同主機間的通訊。socket只要知道了對方的IP和port就可以溝通了，所以這種socket是建立在網路protocol之上的。
++ Unix domain socket
+	- 這種用於一台主機的process之間溝通，不需要建立在網絡protocol之上，主要是基於file system而發展的。與Internet domain socket不一樣的是，Unix domain socket需要知道的是process之間需要基於哪一個文件（相同的文件路徑）來通訊。
++ 實現一個server步驟為：
+    + 創建一個socket
+    + 將socket綁訂到某個地址
+    + 讓socket轉換成被動模式
+    + 接受請求
+
+###　創建一個socket
+```C
+#include <sys/types.h>
+#include <sys/socket.h>
+int socket(int domain, int type, int protocol);
+```
+`domain`：表示通訊在甚麼範圍內作用，不同域的通訊協定是不同的，Unix之多種類的通訊域，其中AF_UNIX（本機通訊）、AF_INET（IP4通訊）、AF_INET6（IP6通訊）最為常見
+
+
+
