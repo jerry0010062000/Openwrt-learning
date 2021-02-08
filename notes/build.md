@@ -1,4 +1,25 @@
-# Building package
+# Overview
+
+`Package`指的是壓縮過的program和一些腳本，其隨附的配置檔用於將其整合到作業系統中，Package由Package Manger管理(OPKG)，包括下載、開啟、安裝、卸載，基本上，openwrt firmware是由packages圍繞著Linux kernel組成。
+每個package都單獨編譯並將其所需文件安裝到臨時資料夾中，然後將資料夾壓縮到firmware的唯讀分區中。
+Kernel的處理也像Package一樣，但是是經由bootloader期望的特殊方式。
+最後就是創建firmware文件，該文件通常是一個image檔，準備將其寫入flash中。
+
+----
+
+## Package compile方式
+
+如果曾經閱讀Makefile，可能會注意到他列出了將要被編譯的官方source code下載連結。
+在`/patch`資料夾底下找到的patch將會被應用在下載後，編譯前。或許會有uci的配置文件。
+所有的package都會經由toolchain來編譯，
+
+## package feeds
+
+並非所有的package都包含在openwrt項目中，Packages來自openwrt主要的repository是由核心開發人員維護，package feeds則是額外添加的package，由社群提供。官方feeds是由官方server提供且編譯，但依然是由社群維護的，packages依照feeds名稱劃分，例如
+
+-----
+
+## Building package
 
 openwrt 是以packages的集合來做開發和維護的，典型的firmware是由package和kernel構成
 
