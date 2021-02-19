@@ -129,6 +129,28 @@ Openwrt建構系統支持多種不同方式下載source code ，大多數package
 或是直接將source放在`package/<packagename>/`下，一般保存在src目錄中
 在makefile聲明下載方法時，透過tarball Http或Https直接取得source code為佳，應避免是用git或SCM clone。
 
+
+rule.mk
+$(1)表示嵌入式系統的映象目錄
+INSTALL_DIR:=install -d -m0755 意思是建立所屬使用者可讀寫和執行，其他使用者可讀可執行的目錄。 
+INSTALL_BIN:=install -m0755 意思是編譯好的檔案存放到映象檔案目錄。
+
+PACKAGE_DIR:=$(BIN_DIR)/packages
+PACKAGE_DIR_ALL:=$(TOPDIR)/staging_dir/packages/$(BOARD)
+BUILD_DIR:=$(BUILD_DIR_BASE)/$(TARGET_DIR_NAME)
+STAGING_DIR:=$(TOPDIR)/staging_dir/$(TARGET_DIR_NAME)
+BUILD_DIR_TOOLCHAIN:=$(BUILD_DIR_BASE)/$(TOOLCHAIN_DIR_NAME)
+TOOLCHAIN_DIR:=$(TOPDIR)/staging_dir/$(TOOLCHAIN_DIR_NAME)
+STAMP_DIR:=$(BUILD_DIR)/stamp
+STAMP_DIR_HOST=$(BUILD_DIR_HOST)/stamp
+TARGET_ROOTFS_DIR?=$(if $(call qstrip,$(CONFIG_TARGET_ROOTFS_DIR)),$(call qstrip,$(CONFIG_TARGET_ROOTFS_DIR)),$(BUILD_DIR))
+TARGET_DIR:=$(TARGET_ROOTFS_DIR)/root-$(BOARD)
+STAGING_DIR_ROOT:=$(STAGING_DIR)/root-$(BOARD)
+STAGING_DIR_IMAGE:=$(STAGING_DIR)/image
+BUILD_LOG_DIR:=$(TOPDIR)/logs
+PKG_INFO_DIR := $(STAGING_DIR)/pkginfo
+
+
 ### package的定義
 
 Makefile中苦子使用define關鍵字定義的常見section如下:

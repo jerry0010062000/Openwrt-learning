@@ -22,6 +22,8 @@ Openwrt從kernel_start()完成後，執行preinit和init到Procd取代流程如�
 ---------------------------------------------------------------------------------------------
 <h2 id="preinit">初始化_preinit階段</h2>
 
+> [官方preinit頁面](https://openwrt.org/docs/techref/preinit_mount#development)
+
 雖然kernel啟動結束後會先執行preinit.sh，但由於變數尚未設定，會直接執行init主要動作如下
 	- bring up basic mounts如 /proc /sys /dev
 	- 創建一些必須的資料夾如 /tmp
@@ -68,6 +70,11 @@ Openwrt從kernel_start()完成後，執行preinit和init到Procd取代流程如�
 >preinit_mount_root
 ```
 實際上只執行`preinit_essential`和 `preinit_main`
+
+`/lib/preinit/00_preinit.conf`是由preinit根據base-file所產生的，可經由make menuconfig設定
+其中`pi_ifname`、`pi_ip`、`pi_broadcast`、`pi_netmask`是為了在preinit期間發送訊息而設置
+
+HOOK `preinit_essentials`原本是用來掛載必要的filesystem如proc和初始化console，但在後來的版本被procd取代
 
 如果沒有進入failsafe模式的話，結束`preinit.sh`回到init，執行callback function結束init，由procd取代他，成為pid = 1的process。
 

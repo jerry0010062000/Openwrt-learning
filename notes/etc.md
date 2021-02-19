@@ -8,6 +8,7 @@
 +  [VLAN](#VLAN)
 +  [Linux中的網路虛擬化](#virtual)
 +  [Linux Socket](#socket)
++  [Linux根文件系統](#rootfs)
 
 <h2 id="etc">雜談</h2>
 
@@ -157,4 +158,7 @@ int socket(int domain, int type, int protocol);
 `domain`：表示通訊在甚麼範圍內作用，不同域的通訊協定是不同的，Unix之多種類的通訊域，其中AF_UNIX（本機通訊）、AF_INET（IP4通訊）、AF_INET6（IP6通訊）最為常見
 
 
+-------
+
+<h2 id="rootfs">LINUX Root file system</h2>
 
