@@ -162,3 +162,29 @@ int socket(int domain, int type, int protocol);
 
 <h2 id="rootfs">LINUX Root file system</h2>
 
+> [參考1](https://blog.csdn.net/LEON1741/article/details/78159754)
+> [參考2](https://fjkfwz.github.io/2014/12/04/Openwrt-File-System/)
+> 
+
+根文件系統是kernel啟動時mount的第一個文件系統，kernel code和image保存在rootfs中，系統引導啟動程式會在根文件系統mount後將依些基本的初始化腳本和服務load到memory中運行
+
+根目錄是整個文件系統的根，如果沒有根，其他文件系統也沒辦法進行加載的，其包含
+	1. init process必須運行在rootfs上
+	2. 提供根目錄 `/`
+	3. mount分區時所依賴的訊息存放在/etc/fstab中
+	4. shell命令必須運行在根文件系統上 如ls、cd
+
+ Linux啟動時，第一必須掛載的是跟文件系統，若系統不能從指定設備上掛載根文件系統，則會出錯而退出啟動，成功之後可以自動或手動掛載其他文件系統
+
+ ### Openwrt filesystem
+
+ 在openwrt中，將內部儲存系統分為`rootfs`、`rootfs_data`，合併在一起成為一個可寫的overlay filesystem
+
+ 由於嵌入式系統的flash容量很小，沒有調整的必要，分割槽都是固定的
+<div align=center><img src="image/rootfs.png" width="" height="" alt="rootfs.png"/></div>
+
+1. kernel啟動完成後，由kernel載入rootfs_rom read only來完成系統初步啟動
+2. rootfs_rom採用linux kernel支援的squashFS(read only file system)並掛載帶`/rom`
+3. 系統將使用JFFS2檔案系統格式化rootfs_data分區並掛載到`/overlay`目錄
+4. 將`/overlay`透明掛載為`/`
+5. 將一部分記憶體掛載為`/tmp`
