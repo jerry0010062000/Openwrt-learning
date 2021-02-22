@@ -1,7 +1,7 @@
 # 無法分類筆記
 
 
-+  [雜談](#etc)
++  [雜記](#etc)
 +  [MAC address的唯一性](#MAC_ADDR)
 +  [kernel space & user space](#KS_US)
 +  [Linux Bridge](#LINUX_BR)
@@ -10,7 +10,7 @@
 +  [Linux Socket](#socket)
 +  [Linux根文件系統](#rootfs)
 
-<h2 id="etc">雜談</h2>
+<h2 id="etc">雜記</h2>
 
 + Default gateway與Default route的差異
 

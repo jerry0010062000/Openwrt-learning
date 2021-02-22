@@ -16,7 +16,7 @@ Procd是一個用C語言編寫的守護行程(daemon)，他持續追蹤那些透
 ----------------------------------------------------------------------------------------------
 <h3 id="init">系統開機流程</h3>
 Openwrt從kernel_start()完成後，執行preinit和init到Procd取代流程如下:
-<div align=center><img src="image/init-img.png" width="" height="" alt="init-proc"/></div>
+<div align=center><img src="../image/init-img.png" width="" height="" alt="init-proc"/></div>
 > [參考自這裡](https://dongshao.blog.csdn.net/article/details/102767797)
 
 ---------------------------------------------------------------------------------------------
