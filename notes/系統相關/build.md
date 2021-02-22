@@ -1,15 +1,16 @@
 + [Overview](#overview)
+
 	- 目錄結構
 + [Packages](#package)
 + [Feeds](#feeds)
+
 	- feeds配置
 	- feeds命令
 	- 自定義feed
 + [Openwrt Build usage](#usage)
 
-
-
 -------------
+
 <h1 id="overview">Overview</h1>
 
 `Package`指的是壓縮過的program和一些腳本，其隨附的配置檔用於將其整合到作業系統中，Package由Package Manger管理(OPKG)，包括下載、開啟、安裝、卸載，基本上，openwrt firmware是由packages圍繞著Linux kernel組成。
@@ -20,12 +21,14 @@ Kernel的處理也像Package一樣，但是是經由bootloader期望的特殊方
 ### 目錄結構
 
 + 重要的原生文件及目錄
+
 	- `Makefile`、`rules.mk`、`include/`包含了整個Openwrt的基本Makefiles，定義了許多Makefile巨集及相關變量
 	- `package/`目錄包含了Openwrt提供的基本packages，這些package並不一定在openwrt中維護，但是可以透過角本來獲取。
 	- `scripts/`目錄包含了openwrt提供了一些實用功能，例如確認packages的完整性、更新到最新版本等
 	- `target/`此目錄中的linux包含了針對不同平台的kernel patch以及特殊配置等
 	- `toolchain/`、`tools/`包含了一些通用的命令及編譯工具練，用來生成firmware、編譯器、c libraries等
 + 編譯中生成的目錄
+
 	- 編譯過程中下載的toolchain、target、package會存放在自動建立的目錄`dl/`下，這個目錄會在make distclean時刪除
 	- `toolchain/`和`tools/`編譯生成的結果會儲存在以下三個目錄中，`build_dir/host/`是一個暫存目錄，用來儲存不依賴目標平台的工具，`build_dir/toolchain`用來儲存依賴於目標平台的工具，`staging_dir/toolchain/`為toolchain最終安裝位置
 	- `bin/`儲存編譯最終生成firmware以及各package的ipk
@@ -40,6 +43,7 @@ Openwrt 是以packages的集合來做開發和維護的，典型的firmware是�
 
 Openwrt package 指的是以下兩種組成的其中之一
 + 在一個source package中擁有
+
 	-  Makefile	-描述軟體原始碼如何取得，如何建構和打包的過程(必須)
 	-  patches/	-包含一些針對官方原始碼的bug fixes、優化內容或自定義功能(option)
 	-  files/	-通常在此目錄下包含一些針對該package的default config以及啟動腳本(option)
@@ -194,6 +198,7 @@ Package/{package-name}/preinst
 Openwrt根目錄下，存在`feeds.conf.deafult`
 feeds 設定檔由三個空格分隔的部分組成:`method`，`name`，`source`。
 Example:
+
 ```shell
 src-git packages https://git.openwrt.org/feed/packages.git
 src-git luci https://git.openwrt.org/project/luci.git
@@ -256,6 +261,7 @@ Commands:
 ### 自定義feeds
 
 + 在已存在的feed中加入package
+
 	1. 下載openwrt項目並命名為openwrt
 	2. 下載packages feed到此目錄下，並命名為packages
 	3. 將自己的package添加到/openwrt/packages下的子目錄中
@@ -265,13 +271,14 @@ Commands:
 src-link customfeed /home/user/openwrt/project/packages
 	```
 + 添加一個全新的feed
+
 	1. 創建項目目錄openwrt
 	2. 建立package目錄並拷貝至/openwrt/project/customfeed/
 	3. 編輯feeds.conf加入
 	```shell
 	src-link customfeed /home/user/openwrt/project/customfeed
 	```
-	
+
 
 最後執行
 1.  ./scripts/feeds update customfeed

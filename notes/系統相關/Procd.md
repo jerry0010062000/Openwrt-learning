@@ -74,7 +74,15 @@ Openwrt從kernel_start()完成後，執行preinit和init到Procd取代流程如�
 `/lib/preinit/00_preinit.conf`是由preinit根據base-file所產生的，可經由make menuconfig設定
 其中`pi_ifname`、`pi_ip`、`pi_broadcast`、`pi_netmask`是為了在preinit期間發送訊息而設置
 
+> path : Image Configuration ->[Y]preinit configuration options 
+
+
 HOOK `preinit_essentials`原本是用來掛載必要的filesystem如proc和初始化console，但在後來的版本被procd取代
+
+在Openwrt原生系統中，將檔案系統分成兩部分`rootfs`和`rootfs_data`(詳見etc)
+在kernel啟動階段掛載唯讀`rootfs`到`/rom`並作為`/`，而在preinir階段才將可讀寫`rootfs_data`掛載到`/overlay`並透明掛載到`/`上，之後對檔案有寫入刪除動作皆是記錄在`rootfs_data`上。
+
+Failsafe模式的進入點在掛載`rootfs_data`之前，可以確保其與/rom的一致性
 
 如果沒有進入failsafe模式的話，結束`preinit.sh`回到init，執行callback function結束init，由procd取代他，成為pid = 1的process。
 
