@@ -23,7 +23,7 @@ Kernel的處理也像Package一樣，但是是經由bootloader期望的特殊方
 + 重要的原生文件及目錄
 
 	- `Makefile`、`rules.mk`、`include/`包含了整個Openwrt的基本Makefiles，定義了許多Makefile巨集及相關變量
-	- `package/`目錄包含了Openwrt提供的基本packages，這些package並不一定在openwrt中維護，但是可以透過角本來獲取。
+	- `package/`目錄包含了Openwrt提供的基本packages，這些package並不一定在openwrt中維護，但是可以透過腳本來獲取。
 	- `scripts/`目錄包含了openwrt提供了一些實用功能，例如確認packages的完整性、更新到最新版本等
 	- `target/`此目錄中的linux包含了針對不同平台的kernel patch以及特殊配置等
 	- `toolchain/`、`tools/`包含了一些通用的命令及編譯工具練，用來生成firmware、編譯器、c libraries等

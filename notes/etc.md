@@ -9,6 +9,7 @@
 +  [Linux中的網路虛擬化](#virtual)
 +  [Linux Socket](#socket)
 +  [Linux根文件系統](#rootfs)
++  [Linux initramfs](#initramfs)
 
 <h2 id="etc">雜記</h2>
 
@@ -190,3 +191,14 @@ int socket(int domain, int type, int protocol);
 3. 系統將使用JFFS2檔案系統格式化rootfs_data分區並掛載到`/overlay`目錄
 4. 將`/overlay`透明掛載為`/`
 5. 將一部分記憶體掛載為`/tmp`
+
+----
+
+<h2 id="initramfs">Linux initramfs</h2>
+
+Linux啟動kernel時，必須找到並執行第一個process(init)，其存在於file system中，故kernel必須先mount rootfs，而文件系統被列在`/etc/fstab`中，故若想要mount必須先找到`/etc/fstab`，但不先mount file system找不到`/etc/fstab`。
+
+在過去，kernel 選項root用來指定root文件系統存在於哪個設備中，但現今root文件可存在於不同類型的硬體上(SCSI,SATA,flash MTD,USB)。如此一來kernel必須先載入其驅動程式，但是在linux環境中，kernel module的載入不在kernel init時執行，而是由第一支process來執行。
+
+為了解決這個問題，使用虛擬檔案系統 (Initial RAM Disk 或 Initial RAM Filesystem) 一般使用的檔名為 /boot/initrd 或 /boot/initramfs 這個檔案的特色是，他也能夠透過 boot loader 來載入到記憶體中，然後這個檔案會被解壓縮並且在記憶體當中模擬成一個根目錄， 且此模擬在記憶體當中的檔案系統能夠提供一支可執行的程式，透過該程式來載入開機過程中所最需要的核心模組
+

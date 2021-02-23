@@ -1,8 +1,9 @@
-# Procd
+# Procd & Init
 ==========================================================
 
 + [什麼是Procd?](#introduction)
-+ [Procd初始化流程](#init)
++ [openwrt作業系統初始化流程](#overview)
+	- [初始化_inir階段](#init)
 	- [初始化_preinit階段](#preinit)
 	- [初始化_procd正式啟動與inittab](#procd_state)
 + [自製init腳本](#DIY)
@@ -11,40 +12,49 @@
 ----------------------------------
 <h3 id="introduction">Procd是什麼?</h3>
 
+在啟動階段，procd作為pid=1的process，從init這支最初的process上取得，本文將講述init是如何執行的，一路到procd取代init為止。
+
 Procd是一個用C語言編寫的守護行程(daemon)，他持續追蹤那些透過init script啟動的process，並在config/environment改變時啟動或重啟服務。
 
 ----------------------------------------------------------------------------------------------
-<h3 id="init">系統開機流程</h3>
+<h3 id="overview">流程Overview</h3>
 Openwrt從kernel_start()完成後，執行preinit和init到Procd取代流程如下:
 <div align=center><img src="../image/init-img.png" width="" height="" alt="init-proc"/></div>
 > [參考自這裡](https://dongshao.blog.csdn.net/article/details/102767797)
 
 ---------------------------------------------------------------------------------------------
-<h2 id="preinit">初始化_preinit階段</h2>
+
+<h2 id="init">初始化_init階段</h2>
 
 > [官方preinit頁面](https://openwrt.org/docs/techref/preinit_mount#development)
 
-雖然kernel啟動結束後會先執行preinit.sh，但由於變數尚未設定，會直接執行init主要動作如下
+雖然kernel載入結束後會先執行`preinit.sh`，但由於變數$Preinit尚未設定，實際上會直接執行/sbin/init，主要動作如下
 	- bring up basic mounts如 /proc /sys /dev
-	- 創建一些必須的資料夾如 /tmp
+	- 創建一些必要的資料夾如 /tmp
 	- bring up /dev/console並打印消息
 	- 設置PATH環境變數
 	- 檢查init_debug是否被設置
 	- 初始化watchdog
 
-接著Init總共創建出三支子程式執行任務 分別是 `kmodloader` `procd` `preinit.sh` 
+接著Init依序建出兩支子程式執行任務 分別是 `kmodloader` `procd`
 
 + Kmodloader維護了一個AVL tree並執行了以下動作
-
   - 開啟`/proc/modules`文件中記錄已安裝的模組插入AVL tree中並設為LOADED
   - 掃描`/lib/modules/核心版本/*.ko`判斷外部模組是否在AVL中，否則加入並設為SCANNED
   - 掃描`/etc/modules-boot.d/`將數字開頭的檔案由小到大循序載入，其他設為PROBE
 
 + 在Init中 fork出來的procd代入參數`/etc/hotplug-preinit.json`執行兩項檢測動作
-  - 韌體升級uevent 執行腳本`/sbin/hotplug-call`加載`/lib/firmware`下的升級
-  - 判斷uevent "SUBSYSTEM"為button，執行`/etc/rc.bottom/failsafe`建立檔案`/tmp/failsafe-button`
+  - 韌體升級uevent 執行腳本`/sbin/hotplug-call`加載`/lib/firmware`下的upgrade
+  - 判斷uevent "SUBSYSTEM"為button，執行`/etc/rc.bottom/failsafe`建立檔案`/tmp/failsafe-button`供後面的preinit腳本檢測
 
-+ preinit.sh定義了五個hook後執行`/lib/preinit/`目錄下腳本，每個腳本定義了一個function並且將其掛到五個hook上，分別是:
+-----
+
+<h2 id="preinit">初始化_preinit階段</h2>
+
+> [官方preinit頁面](https://openwrt.org/docs/techref/preinit_mount#development)
+> 
+
+preinit.sh定義了五個hook後執行`/lib/preinit/`目錄下腳本，每個腳本定義了一個function並且將其掛到五個hook上，分別是:
 ```bash
 >#hook
 >preinit_essential
@@ -72,23 +82,41 @@ Openwrt從kernel_start()完成後，執行preinit和init到Procd取代流程如�
 實際上只執行`preinit_essential`和 `preinit_main`
 
 `/lib/preinit/00_preinit.conf`是由preinit根據base-file所產生的，可經由make menuconfig設定
-其中`pi_ifname`、`pi_ip`、`pi_broadcast`、`pi_netmask`是為了在preinit期間發送訊息而設置
 
 > path : Image Configuration ->[Y]preinit configuration options 
+> 
 
+其中`pi_ifname`、`pi_ip`、`pi_broadcast`、`pi_netmask`是為了在failsafe模式下連線使用，之所以在這邊設置是因為目前系統還未掛載`rootfs_data`(無讀寫)，必須在製作firmware時預先定義(在preinit結束時會清除這些設定)
 
-HOOK `preinit_essentials`原本是用來掛載必要的filesystem如proc和初始化console，但在後來的版本被procd取代
+>HOOK `preinit_essentials`原本是用來掛載必要的filesystem如proc和初始化console，但在後來的版本被procd取代
 
 在Openwrt原生系統中，將檔案系統分成兩部分`rootfs`和`rootfs_data`(詳見etc)
 在kernel啟動階段掛載唯讀`rootfs`到`/rom`並作為`/`，而在preinir階段才將可讀寫`rootfs_data`掛載到`/overlay`並透明掛載到`/`上，之後對檔案有寫入刪除動作皆是記錄在`rootfs_data`上。
 
 Failsafe模式的進入點在掛載`rootfs_data`之前，可以確保其與/rom的一致性
 
-如果沒有進入failsafe模式的話，結束`preinit.sh`回到init，執行callback function結束init，由procd取代他，成為pid = 1的process。
+如果沒有進入failsafe模式的話，結束`preinit.sh`回到init，執行callback function結束init，執行spawn_procd()這個callback function，讓procd取代他，成為pid = 1的process。
+
+在preinit階段結束後，將會清除前面設定的各種參數。
 
 ---------------------
 
 <h2 id="procd_state">初始化_procd正式啟動與inittab</h2>
+
+procd初始化主要經過幾個階段，每個階段只要滿足條件便會往下個階段前進
++ state early
+	- procd signal的處置
+	- 刪除前面產生的procd
+	- 設定watchdog timeout
+	- 以/etc/hotplug.json監控事件處理
+	- udev
++ state ubus
+	- 重啟/dev/console stdin stdout stderr
+	- ubus timeout 等待連接上ubus後進入下一階段
++ state init
+	- 讀取並執行inittab，其中包括/etc/rc.d/啟動腳本的執行
++ state_running
+	- 系統開啟完畢進入daemon模式
 
 ---------------------
 
@@ -96,6 +124,7 @@ Failsafe模式的進入點在掛載`rootfs_data`之前，可以確保其與/rom�
 
 必須放在`/etc/init.d/`
 init腳本模板由rc.common提供，需在script前加上
+
 ```shell
 #!/bin/sh /etc/rc.common
 USE_PROCD=1
