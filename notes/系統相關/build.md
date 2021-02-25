@@ -35,6 +35,18 @@ Kernel的處理也像Package一樣，但是是經由bootloader期望的特殊方
 	- `build_dir/linux-*/`儲存編譯過程中展開的kernel與驅動模組的code以及編譯生成的目標文件
 	- `build_dir/target-\*/`儲存編譯過程中展開的所有packages code以及編譯生成的目標文件
 
+> `Build_dir`與`staging_dir`的差異:
+> 
+
++ Build_dir:用來unpack全部的來源檔案，並且compile他們
+	- `build_dir/host`用來compiling所有host上所需的工具
+	- `build_dir/toolchain`用來compiling cross-C compiler和C標準函式庫，這個區域用來存放跑在host上compiling programs(cross C compiler)，和跑在target上的libraries(uClibc,libm,pthreads...etc)
+	- `build_dir/target`用來compiling給target system的packages和kernel
++ Staging_dir:用來"install"所有被編譯過的程式，不論是用來編譯更進一步的packages，或者是用來準備生成firmware image
+	- `staging_dir/host`一個小型的Linux root，擁有/bin,/lib...etc，這是host tools安裝的地方，建構系統其餘的部分會將該區域的目錄前綴到Path中。
+	- `staging_dir/toolchain`也是一個小型的linux root，包含交叉C編譯器用來建構其餘的firmware，可以用來在openwrt之外編譯可用來載入到firmware的C程式example:`staging_dir/toolchain-mips_34kc_gcc-4.8-linaro_uClibc-0.9.33.2/bin/mips-openwrt-linux-uclibc-gcc`。
+	- `staging_dir/target.../root-...`:包含已被安裝版本的package在/bin，/lib下，這在將來會再通過一些調整將其壓縮到實際的firmware跟目錄中
+
 ----
 
 <h2 id="package">Packages</h2>
