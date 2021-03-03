@@ -1,9 +1,11 @@
 + [Overview](#overview)
-
-	- 目錄結構
+	- [目錄結構](#index)
 + [Packages](#package)
+	- [Makefile寫法](#makefile)
+	- [Rule.mk預定義的變數](#rulemk)
+	- [關鍵字的定義](#keywordef)
+	- [相依](#depend)
 + [Feeds](#feeds)
-
 	- feeds配置
 	- feeds命令
 	- 自定義feed
@@ -18,7 +20,7 @@
 Kernel的處理也像Package一樣，但是是經由bootloader期望的特殊方式。
 最後就是創建firmware文件，該文件通常是一個image檔，準備將其寫入flash中。
 
-### 目錄結構
+<h2 id="index">目錄結構</h2>
 
 + 重要的原生文件及目錄
 
@@ -49,7 +51,7 @@ Kernel的處理也像Package一樣，但是是經由bootloader期望的特殊方
 
 ----
 
-<h2 id="package">Packages</h2>
+<h1 id="package">Packages</h1>
 
 Openwrt 是以packages的集合來做開發和維護的，典型的firmware是由package和kernel構成
 
@@ -61,8 +63,7 @@ Openwrt package 指的是以下兩種組成的其中之一
 	-  files/	-通常在此目錄下包含一些針對該package的default config以及啟動腳本(option)
 + 一個binary package，GNU tar 兼容檔案，包含隨附的package控制文件，類似於.deb或.rpm
 
-## Makefile
-
+<h2 id="makefile">Makefile</h2>
 以下是一個example
 ```shell
 include $(TOPDIR)/rules.mk
@@ -145,8 +146,8 @@ Openwrt建構系統支持多種不同方式下載source code ，大多數package
 或是直接將source放在`package/<packagename>/`下，一般保存在src目錄中
 在makefile聲明下載方法時，透過tarball Http或Https直接取得source code為佳，應避免是用git或SCM clone。
 
-
-rule.mk
+<h2 id="rulemk">Rule.mk預定義變數</h2>
+```
 $(1)表示嵌入式系統的映象目錄
 INSTALL_DIR:=install -d -m0755 意思是建立所屬使用者可讀寫和執行，其他使用者可讀可執行的目錄。 
 INSTALL_BIN:=install -m0755 意思是編譯好的檔案存放到映象檔案目錄。
@@ -165,11 +166,11 @@ STAGING_DIR_ROOT:=$(STAGING_DIR)/root-$(BOARD)
 STAGING_DIR_IMAGE:=$(STAGING_DIR)/image
 BUILD_LOG_DIR:=$(TOPDIR)/logs
 PKG_INFO_DIR := $(STAGING_DIR)/pkginfo
+```
 
+<h2 id="keywordef">Package關鍵字的define</h2>
 
-### package的定義
-
-Makefile中苦子使用define關鍵字定義的常見section如下:
+Makefile中可能使用define關鍵字定義的常見section如下:
 #### Package/{package-name}
 	- CATEGORY:定義menuconfig中這個package會出現在哪個子目錄下
 	- TITLE:針對本package的簡短描述
@@ -177,32 +178,88 @@ Makefile中苦子使用define關鍵字定義的常見section如下:
 	- MAINTAINER:主要維護者
 
 #### Package/{package-name}/conffiles (option)
-一份由這個package安裝的配置文件列表，每行一個文件
+	一份由這個package安裝的配置文件列表，每行一個文件
 
 #### Package/{package-name}/description
-任何用来描述这個package的文字。
+	任何用来描述这個package的文字。
 
 #### Build/Prepare (option)
-一些命令的集合，用於解包source code以及應用patch
+	一些命令的集合，用於解包source code以及應用patch
 
 #### Build/Configure (option)
-很多開源軟體的source在執行前要先執行`./configure`做一 些配置，這個section可以描述如何配置
+	很多開源軟體的source在執行前要先執行`./configure`做一 些配置，這個section可以描述如何配置
 
 #### Build/Compile (option)
-定義如何編譯此package，如果不定義openwrt會自動執行make 如果需要傳遞特殊參數可以參考$(call Build/Compile/Default,FOO=bar)
+	定義如何編譯此package，如果不定義openwrt會自動執行make 如果需要傳遞特殊參數可以參考$(call Build/Compile/Default,FOO=bar)
 
 #### Build/Install (option)
-定義如何安裝編譯好的文件，預設是執行make install
+	定義如何安裝編譯好的文件，預設是執行make install
 
 #### Package/{package-name}/install
-一系列的命令集合，用於將文件拷貝到ipkg目錄（用$(1)表示）。 OpenWrt把每個包在各自的源碼目錄編譯好後，安裝過程會在這個包的編譯目錄下創建一個ipkg目錄（名字有可能會是ipkg-<target>形式，target表示OpenWrt menuconfig中設置的target） ，然後將所有需要包含到最終文件系統的文件按照其完整路徑拷貝到這個ipkg目錄中，最後在生成文件系統時會把所有的ipkg目錄中的內容都複製到文件系統目錄下，然後才生成最終的固件。
+	一系列的命令集合，用於將文件拷貝到ipkg目錄(用$(1)表示)。
 
-Package/{package-name}/preinst
+#### Package/{package-name}/preinst
+
+------
+
+<h2 id="depend">相依性</h2>
+
+> 來源:https://openwrt.org/docs/guide-developer/package-policies
+
+package可能依賴於其他的package以滿足編譯要求或強制執行特定功能，如shared library在target device上，有以下兩種`dependenices` :
+    1. build dependencies:在`PKG_BUILD_DEPENDS`被定義
+    2. runtime dependencies:在`DEPENDS`變數中宣告
+
+`build dependence`的依賴關係在編譯時被使用，並指示build system在編譯前download、patch、compile每個提到的依賴關係
+
+`runtime dependencies`描述運行時指令binary package的關係，指示package manager在安裝這個package之前先獲取並安裝列出的dependencies，一個runtime dependence自動的隱含了build dependencies，這代表了如果在來源define/Package之中的`DEPEND`定義了另一個package的define/Package名稱，則build system就會先編譯後者
+
+package的相依性必須來自相同的feed或者是openwrt在`package/`目錄中提供的base feed
+
+### shared library
+儘管package的dependency機制會確保build system先編譯需要的libraray但不能保證library不會更新版本，並且在binary package庫中安裝不相容的版本也會破壞依賴關係的package，除非對依賴版本進行限制。
+
+openwrt引進`ABI_VERSION`的概念，來解決program對特定版本的依賴關係，`ABI_VERSION`值被反映在被打包library的`SONAME`中。
+
+shared library的實際檔名:格式為`lib+math+.so+主版本號+小版本號+製作號`
+1.主版本號:代表目前共享庫的版本，如果提供的interface有變化的話，版本號+1
+2.小版本號:如果引入了新的feature，但其餘沒變化，此版本號+1
+3.製作號:通常只用來表示修正bug
+
+`SONAME`(short for shared object name):他是可執行程式要載入lib時尋找的檔名，格式為`lib+math+.so+主版本號`
+`link name`:專門為可執行程式生成階段連結共享庫時用的名子，不帶任何版本號
+
+eg. 一個library package`libbar`會在編譯完成後提供以下檔案
+```
+libbar.so       -> libbar.so.1.2.3 (軟連結)
+libbar.so.1     -> libbar.so.1.2.3 (軟連結)
+libbar.so.1.2.3      (shared library object)
+```
+
+`$(INSTALL_DATA)`和`$(INSTALL_BIN)`將會將當前檔案複製到目標位置中，在實際上我們傾向使用`$(CP)`，他會保留軟連結
+
+```
+執行:
+$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/lib/libbar.so.* $(1)/usr/lib/
+結果:
+	libbar.so.1               (regular file)
+	libbar.so.1.2.3           (regular file)
+```
+```
+執行:
+$(CP) $(PKG_INSTALL_DIR)/usr/lib/libbar.so.* $(1)/usr/lib/
+結果:
+    libbar.so.1     -> libbar.so.1.2.3 (symlink)
+    libbar.so.1.2.3                    (regular file)
+```
+
+
 
 
 ----
 
 <h2 id="feeds">Feeds</h2>
+
 
 在openwrt中，feeds是公用一個儲存空間的package集合，如遠端伺服器上，版本控制系統中，本機file system中，feeds都是一些為Openwrt buildroot預先定義好額外的packages的編譯方法。Openwrt預設許多可用的package，使用者可自由選擇是否要編譯某個package，如果需要的package不是openwrt自有的，可以從官方feeds中下載packages以便在openwrt中配置並編譯，也可以創建屬於自己的feeds，加入不屬於官方的packages。
 
