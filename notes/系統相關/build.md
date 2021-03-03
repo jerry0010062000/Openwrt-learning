@@ -65,6 +65,48 @@ Openwrt package 指的是以下兩種組成的其中之一
 
 <h2 id="makefile">Makefile</h2>
 
+以下是一個example:
+
+```shell
+include $(TOPDIR)/rules.mk
+ 
+PKG_NAME:=bridge
+PKG_VERSION:=1.0.6
+PKG_RELEASE:=1
+ 
+PKG_BUILD_DIR:=$(BUILD_DIR)/bridge-utils-$(PKG_VERSION)
+PKG_SOURCE:=bridge-utils-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=@SF/bridge
+PKG_HASH:=9b7dc52656f5cbec846a7ba3299f73bd
+ 
+include $(INCLUDE_DIR)/package.mk
+ 
+define Package/bridge
+  SECTION:=base
+  CATEGORY:=Network
+  TITLE:=Ethernet bridging configuration utility
+  #DESCRIPTION:=This variable is obsolete. use the Package/name/description define instead!
+  URL:=http://bridge.sourceforge.net/
+endef
+ 
+define Package/bridge/description
+ Ethernet bridging configuration utility
+ Manage ethernet bridging; a way to connect networks together to
+ form a larger network.
+endef
+ 
+define Build/Configure
+  $(call Build/Configure/Default,--with-linux-headers=$(LINUX_DIR))
+endef
+ 
+define Package/bridge/install
+        $(INSTALL_DIR) $(1)/usr/sbin
+        $(INSTALL_BIN) $(PKG_BUILD_DIR)/brctl/brctl $(1)/usr/sbin/
+endef
+ 
+$(eval $(call BuildPackage,bridge))
+```
+
 ### Package變量
 
 | var | desc |
@@ -85,20 +127,6 @@ Openwrt package 指的是以下兩種組成的其中之一
 |PKG_FIXUP|將在後面描述|
 |PKG_SOURCE_PROTO|獲取原始碼的協議|
 |PKG_CONFIG_DEPENDS|指定那些config會影響build，當改變時重新運行 Build/Configure|
-
-#### PKG_FIXUP
-许多软件包认为autotools是一个好工具，最终需要修复来解决自动化工具“意外的”认为使用主机工具（就是你的电脑系统上安装的一些构建工具）替代构建环境的工具（指OpenWrt项目上的toolchain中提供的构建工具）更好。OpenWrt定义一些PKG_FIXUP规则帮助解决此事。
-
-PKG_FIXUP可以是下面几个值之一：
-
-1. autoreconf：这将会执行以下动作
-    - autoreconf -f -i
-    - 创建必须但是缺失的文件
-    - 保证openwrt-libtool已被链接好
-    - 阻止autopoint/gettext
-2. patch-libtool： 如果释出的automake方法已破坏且无法修复，则寻找一个libtool实例，检测其版本并应用OpenWrt的修正补丁。
-3. gettext-version： 这个fixup在automake的gettext支持中阻止了版本不匹配的错误。
-	提醒：使用autotool工具的软件包应该通过简单的指定PKG_FIXUP:=autoreconf正常工作，否则就可能出现要求特定版本的问题。
 
 在makefile文件中最底部調用的BuildPackage才是真正執行命令的地方，僅接受一個參數:package name，其他所有需要訊息從define中得到。
 
