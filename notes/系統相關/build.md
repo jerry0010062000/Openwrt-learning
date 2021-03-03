@@ -64,46 +64,6 @@ Openwrt package 指的是以下兩種組成的其中之一
 + 一個binary package，GNU tar 兼容檔案，包含隨附的package控制文件，類似於.deb或.rpm
 
 <h2 id="makefile">Makefile</h2>
-以下是一個example
-```shell
-include $(TOPDIR)/rules.mk
- 
-PKG_NAME:=bridge
-PKG_VERSION:=1.0.6
-PKG_RELEASE:=1
- 
-PKG_BUILD_DIR:=$(BUILD_DIR)/bridge-utils-$(PKG_VERSION)
-PKG_SOURCE:=bridge-utils-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=@SF/bridge
-PKG_HASH:=9b7dc52656f5cbec846a7ba3299f73bd
- 
-include $(INCLUDE_DIR)/package.mk
- 
-define Package/bridge
-  SECTION:=base
-  CATEGORY:=Network
-  TITLE:=Ethernet bridging configuration utility
-  #DESCRIPTION:=This variable is obsolete. use the Package/name/description define instead!
-  URL:=http://bridge.sourceforge.net/
-endef
- 
-define Package/bridge/description
- Ethernet bridging configuration utility
- Manage ethernet bridging; a way to connect networks together to
- form a larger network.
-endef
- 
-define Build/Configure
-  $(call Build/Configure/Default,--with-linux-headers=$(LINUX_DIR))
-endef
- 
-define Package/bridge/install
-        $(INSTALL_DIR) $(1)/usr/sbin
-        $(INSTALL_BIN) $(PKG_BUILD_DIR)/brctl/brctl $(1)/usr/sbin/
-endef
- 
-$(eval $(call BuildPackage,bridge))
-```
 
 ### Package變量
 
