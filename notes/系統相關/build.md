@@ -135,6 +135,7 @@ Openwrt建構系統支持多種不同方式下載source code ，大多數package
 在makefile聲明下載方法時，透過tarball Http或Https直接取得source code為佳，應避免是用git或SCM clone。
 
 <h2 id="rulemk">Rule.mk預定義變數</h2>
+
 ```
 $(1)表示嵌入式系統的映象目錄
 INSTALL_DIR:=install -d -m0755 意思是建立所屬使用者可讀寫和執行，其他使用者可讀可執行的目錄。 
