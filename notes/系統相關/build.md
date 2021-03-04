@@ -167,25 +167,25 @@ Makefile中可能使用define關鍵字定義的常見section如下:
 	- MAINTAINER:主要維護者
 
 #### Package/{package-name}/conffiles (option)
-	一份由這個package安裝的配置文件列表，每行一個文件
+>一份由這個package安裝的配置文件列表，每行一個文件
 
 #### Package/{package-name}/description
-	任何用来描述这個package的文字。
+>任何用来描述这個package的文字。
 
 #### Build/Prepare (option)
-	一些命令的集合，用於解包source code以及應用patch
+>一些命令的集合，用於解包source code以及應用patch
 
 #### Build/Configure (option)
-	很多開源軟體的source在執行前要先執行`./configure`做一 些配置，這個section可以描述如何配置
+>很多開源軟體的source在執行前要先執行`./configure`做一 些配置，這個section可以描述如何配置
 
 #### Build/Compile (option)
-	定義如何編譯此package，如果不定義openwrt會自動執行make 如果需要傳遞特殊參數可以參考$(call Build/Compile/Default,FOO=bar)
+>定義如何編譯此package，如果不定義openwrt會自動執行make 如果需要傳遞特殊參數可以參考$(call Build/Compile/Default,FOO=bar)
 
 #### Build/Install (option)
-	定義如何安裝編譯好的文件，預設是執行make install
+>定義如何安裝編譯好的文件，預設是執行make install
 
 #### Package/{package-name}/install
-	一系列的命令集合，用於將文件拷貝到ipkg目錄(用$(1)表示)。
+>一系列的命令集合，用於將文件拷貝到ipkg目錄(用$(1)表示)。
 
 #### Package/{package-name}/preinst
 
