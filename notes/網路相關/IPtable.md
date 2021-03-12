@@ -6,6 +6,7 @@
 	- [IP link](#iplink)
 	- [IP address](#ipaddress)
 	- [IP neighbour](#ipneigh)
+	- [IP route](#iproute)
 
 -----
 
@@ -179,12 +180,15 @@ ip addr add 10.0.0.1/24 brd + dev eth0
 ```
 
 <h3 id="ipaddrdel">ip address delete</h3>
+
 同義:delete、del、d
 參數名稱與 add一致，設備名稱為必填參數
+
 ```shell
 ip addr del 127.0.0.1/8 dev lo
 # deletes the loopback address from loopback device.
 ```
+
 <h3 id="ipaddrshow">ip address show</h3>
 同義:show、list、lst、sh、ls、l
 
@@ -265,6 +269,8 @@ ip neigh chg 10.0.0.3 dev eth0 nud reachable
 
 <h2 id="iproute">ip route</h2>
 同義:route、ro、r
+可用command : [add](#iprouteadd)、[delete](#iproutedel)、flush、[get](#iprouteget)
+
 > 以指令用來管理kernel routing table中的entry，kernel會保留到其他網路節點路徑的資料
 > 
 
@@ -278,10 +284,121 @@ ip neigh chg 10.0.0.3 dev eth0 nud reachable
 `route attributes`:每個route key皆引用自route information，route information包含了IP packet所需的data，eg.output device、next hop....
 `route types`:一些必要屬性和可選屬性組合而成，用來描述主機到主機的真實路徑，如:unicast routes，example:unicast、unreachable、blackhole、prohibit、local、broadcast、throw、nat、anycast、multicast
 `routing table`:Linux將多個route放到routing table中，routing的ID從0-255，預設routes都會新增進主要的main table(ID 254)，實際上kernel維護另一個不可見的table(ID 255)。
+
 > 多個routing table並不會造成辨識困難，透過{tableid,prefix,tos,preference}來獲得route，而下一節的rules決定了要引用哪張routing table
 > 
 
-<h3 id="iprouteadd">ip route add</h3>
+<h3 id="iprouteadd">ip route add、change、replace</h3>
 
+|Argument|Description|
+|---|---|
+|to PREFIX / to TYPE PREFIX|Dest的前綴，如果省略type假定為unicast|
+|tos TOS / dsfield TOS|tos key|
+|metric NUMBER / preference NUMBER|路由的優先度值|
+|table TABLEID|想要添加進入的目標table，若沒設置，除local,boardcast,nat外都會加入main table|
+|dev NAME|output device name|
+|via ADDRESS|nexthop router address|
+|src ADDRESS| |
+|realm REALMID|route 被分配到的realmid，來自/etc/iproute2/rt_realms|
+|mtu MTU / mtu lock MTU|最大傳輸單位，如果沒有lock，kernel可能會更新MTU|
+|window NUMBER|類似TCP receive buffer|
+|nexthop NEXTHOP|nexthop是一個複合的值|
+|scope SCOPE_VAL|如果省略，則假定scope範圍為所有gatewayed unicast scope|
+|protocol RTPROTO|這條路線是由不了解自己在做甚麼的人添加的|
+|onlink|nexthop直接連到此link上|
+|equalize|允許在多路徑路由上進行逐包隨機分組|
+
+Example:
+```
+Add a plain route to network 10.0.0/24 via gateway 193.233.7.65
+ip route add 10.0.0/24 via 193.233.7.65
+change it to a direct route via device dummy
+ip ro chg 10.0.0/24 via 193.233.7.65 dev dummy
+Add default multipath route splitting load between ppp0 and ppp1
+ip route add default scope global nexthop dev ppp0 nexthop dev ppp1
+```
+
+<h3 id="iproutedel">ip route delete</h3>
+
+route delete與add的參數基本相似，但有些不同
+由key value(dest,tos,perference,table)選擇想要刪除的路徑，如果有其他額外的屬性，ip會驗證參數是否吻合，如果找不到，del會失敗
+
+<h3 id="iprouteshow"ip route show</h3>
+
+|Argument|Description|
+|---|---|
+|to SELECTOR|由修飾符(root,match,exact)和prefix組合|
+|all|列出所有tables|
+|cache|dump routing cache|
+|form SELECTOR|與to相似，但是過濾的是source|
+|protocol RTPROTO|只列出此protocol的routes|
+|scope SCOPE_VAL|只列出這個範圍的|
+|type TYPE| |
+|dev NAME|列出通過此device的route|
+|via PREFIX|以前綴來篩選nexthop route|
+|src PREFIX|根據src prefix來篩選|
+
+
+<h3 id="iprouteget">ip route get</h3>
+
+> 此指令透過kernel發出模擬訊息，並打印出實際通過的route
+> 
+
+|Argument|Description|
+|---|---|
+|to ADDRESS|dest|
+|from ADDRESS|source|
+|tos TOS|type of service|
+|iif NAME|預期會抵達的device|
+|oif NAME|packet會強制由此device輸出|
+
+-----
+
+<h2 id="iprule">ip rule</h2>
+
+> internet中使用經典的路由演算法僅基於destination，但有時我們必須根據其他的datagram選擇目標，如source,protocol...，這個task稱為:"policy routing"
+> 
+
+`Routing policy database`(RPDB):透過執行某些規則集來選擇合適的路由
+在Linux中RPDB是由數字優先集排序的線性規則表，RPDB允許matching dest、src、tos，並使用fwmark值來匹配。
+
+`rule type`: unicast、blackhole、unreachable、prohibit、nat
+
+<h3 id="ipruleadd">ip rule add delete</h3>
+
+|Argument|Description|
+|---|---|
+|type TYPE|在rule type中|
+|from PREFIX|從src的prefix match|
+|to PREFIX|從dest的prefix match|
+|iif NAME|選擇要傳入的設備|
+|tos TOS|選擇TOS來match|
+|fwmark| |
+|priority REFERENCE|priority為32bit number|
+
+> ip rule add不要求添加任何priority，並允許prioirity重複，如果沒提供priority則kernel會自動分配，如果提出的規則priority已經擁有，則系統會在舊規則之前新增規則。
+> 請注意，創建規則時應該都帶有顯示priority
+> 
+
+Example:
+```shell
+#Route packets with source addresses from 192.203.80/24 according to routing table inr.ruhep
+
+ip rule add from 192.203.80.0/24 table inr.ruhep prio 220
+
+#Translate packet source 193.233.7.83 to 192.203.80.144 and route it according to table #1 (Table #1 is defined in /etc/iproute/rt_tables as inr.ruhep)
+
+ip rule add from 193.233.7.83 nat 192.203.80.144 table 1 prio 320
+
+#Delete unused default rule
+
+ip rule del prio 32767
+```
+
+<h3 id="ipruleshow">ip rule show</h3>
+
+沒有任何的參數...
+
+-------
 
 
