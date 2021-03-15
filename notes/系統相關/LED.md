@@ -70,6 +70,7 @@ Trigger可被填入的原生系統參數如下 : [none](#none)、[switch0](#swit
 
 
 <h2 id ="switch">switch0</h2>
+
 > 如果已在已配置的switch port上建立連結，則該指示燈發亮
 
 |Name|Type|require|default|Description|
@@ -98,9 +99,11 @@ Trigger可被填入的原生系統參數如下 : [none](#none)、[switch0](#swit
 > LED會模擬心跳，必須安裝`kmod-ledtrig-heartbeat`
 
 <h2 id ="flashwrite">nand-disk</h2>
+
 > 當寫入NAND flash時LED閃爍
 
 <h2 id ="netdev">netdev</h2>
+
 > 當被配置的interface傳送或接收時，LED會閃爍
 > 
 
@@ -113,6 +116,7 @@ Trigger可被填入的原生系統參數如下 : [none](#none)、[switch0](#swit
 |interval|int|no|閃爍的間隔(milliseconds)|
 
 <h2 id ="wifi">WiFi Activity triggers</h2>
+
 > LED只會被物理界面觸發，注意trigger不是填標題名稱，可填入值在下
 > 
 
@@ -129,6 +133,7 @@ trigger可填入的值
 + phy0tpt - 與tr、tx模式相比 緩慢但穩定的閃爍
 
 <h2 id ="usb">usbdev</h2>
+
 > LED會在USB連接時閃爍，必須安裝`kmod-ledtrig-usbdev`
 > 
 
@@ -141,6 +146,7 @@ trigger可填入的值
 |dev|string|yes|none|USB裝置名稱|
 
 #### GPIO
+
 > 由GPIO來控制，必須安裝`kmod-ledtrig-gpio`
 > 
 
@@ -149,6 +155,7 @@ trigger可填入的值
 |default|int|no|0|在trigger前狀態0:off;1:on|
 
 #### Net filter
+
 > 當有LED通過機器時閃爍，必須安裝`kmod-ipt-led`
 
 -------
