@@ -81,9 +81,11 @@ Trigger可被填入的原生系統參數如下 : [none](#none)、[switch0](#swit
 |speed_mask|int|no|none|16進位mask用來過濾ethernet速度|
 
 `port_mask`例子0x1e二進制為000111110，從右到左，不包括CPU，包括4個switch port，並將其餘位置設置為0
+
 `port_speed`以標準BASE-T來分配
 
 <h2 id ="timer">timer</h2>
+
 > 配置LED閃爍頻率，必須包含`kmod-ledtrig-timer`
 > 
 
