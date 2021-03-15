@@ -1,3 +1,5 @@
+
+
 # Openwrt LED
 
 ----
@@ -15,7 +17,8 @@
 
 -----
 
-<h1 id="easy">簡單操作</h1>
+<h1 id="easy">直接操作</h1>
+
 每個LED都有一個個別的檔案系統目錄，直接進入`/sys/class/leds`底下，以`<路由器名稱>:顏色:<功能>`命名的目錄均對應一個LED，進入要操作的目錄，`trigger`(觸發方式)、`brightness`(開關)、`delay_off`(熄燈時間)、`delay_on`(亮燈時間)
 
 對文件brightness寫入0/1，關閉/打開LED燈，如echo 0 > brightness
@@ -51,15 +54,24 @@ root@lede:/# cat /sys/class/leds/tp-link:green:qss/trigger
 [none] switch0 timer default-on netdev usbdev phy0rx phy0tx phy0assoc phy0radio phy0tpt 
 ```
 
-#### none
-LED始終處於deafult狀態，未列出的預設為OFF，因此僅在LED始終為ON時有用
+Trigger可被填入的原生系統參數如下 : [none](#none)、[switch0](#switch)、[timer](#timer)、[heartbeat](#heartbeat)、[nand-disk](#flashwrite)、[netdev](#netdev)、[WiFi Activity triggers](#wifi)、[usbdev](#usb)、
+
+
+<h2 id ="none">none</h2>
+
+> LED始終處於deafult狀態，未列出的預設為OFF，因此僅在LED始終為ON時有用
+> 
+
 |Name|Type|require|default|Description|
 |---|---|---|--|--------|
 |default|int|no|0|在trigger前狀態0:off;1:on|
 |sysfs|string|yes|none|裝置名稱|
 
-#### switch0
-如果已在已配置的switch port上建立連結，則該指示燈發亮
+
+
+<h2 id ="switch">switch0</h2>
+> 如果已在已配置的switch port上建立連結，則該指示燈發亮
+
 |Name|Type|require|default|Description|
 |---|---|---|--|--------|
 |default|int|no|0|在trigger前狀態0:off;1:on|
@@ -70,8 +82,10 @@ LED始終處於deafult狀態，未列出的預設為OFF，因此僅在LED始終�
 `port_mask`例子0x1e二進制為000111110，從右到左，不包括CPU，包括4個switch port，並將其餘位置設置為0
 `port_speed`以標準BASE-T來分配
 
-#### Timer
-配置LED閃爍頻率，必須包含`kmod-ledtrig-timer`
+<h2 id ="timer">timer</h2>
+> 配置LED閃爍頻率，必須包含`kmod-ledtrig-timer`
+> 
+
 |Name|Type|require|default|Description|
 |---|---|---|--|--------|
 |default|int|no|0|在trigger前狀態0:off;1:on|
@@ -79,14 +93,17 @@ LED始終處於deafult狀態，未列出的預設為OFF，因此僅在LED始終�
 |delayoff|int|yes|none|LED要關閉多久(millisecond)|
 |delayon|int|yes|none|LED要打開多久(millisecond)|
 
-#### Heartbeat
-LED會模擬心跳，必須安裝`kmod-ledtrig-heartbeat`
+<h2 id ="heartbeat">heartbeat</h2>
 
-#### Flash writes
-當寫入NAND flash時LED閃爍
+> LED會模擬心跳，必須安裝`kmod-ledtrig-heartbeat`
 
-#### Network activity
-當被配置的interface傳送或接收時，LED會閃爍
+<h2 id ="flashwrite">nand-disk</h2>
+> 當寫入NAND flash時LED閃爍
+
+<h2 id ="netdev">netdev</h2>
+> 當被配置的interface傳送或接收時，LED會閃爍
+> 
+
 |Name|Type|require|default|Description|
 |---|---|---|--|--------|
 |default|int|no|0|在trigger前狀態0:off;1:on|
@@ -95,8 +112,10 @@ LED會模擬心跳，必須安裝`kmod-ledtrig-heartbeat`
 |mode|string|yes|no|none|tx,rx|
 |interval|int|no|閃爍的間隔(milliseconds)|
 
-#### Wifi activity trigger
-LED只會被物理界面觸發
+<h2 id ="wifi">WiFi Activity triggers</h2>
+> LED只會被物理界面觸發，注意trigger不是填標題名稱，可填入值在下
+> 
+
 |Name|Type|require|default|Description|
 |---|---|---|--|--------|
 |default|int|no|0|在trigger前狀態0:off;1:on|
@@ -109,8 +128,10 @@ trigger可填入的值
 + phy0radio 
 + phy0tpt - 與tr、tx模式相比 緩慢但穩定的閃爍
 
-#### USB device
-LED會在USB連接時閃爍，必須安裝`kmod-ledtrig-usbdev`
+<h2 id ="usb">usbdev</h2>
+> LED會在USB連接時閃爍，必須安裝`kmod-ledtrig-usbdev`
+> 
+
 |Name|Type|require|default|Description|
 |---|---|---|--|--------|
 |default|int|no|0|在trigger前狀態0:off;1:on|
@@ -120,13 +141,15 @@ LED會在USB連接時閃爍，必須安裝`kmod-ledtrig-usbdev`
 |dev|string|yes|none|USB裝置名稱|
 
 #### GPIO
-由GPIO來控制，必須安裝`kmod-ledtrig-gpio`
+> 由GPIO來控制，必須安裝`kmod-ledtrig-gpio`
+> 
+
 |Name|Type|require|default|Description|
 |---|---|---|--|--------|
 |default|int|no|0|在trigger前狀態0:off;1:on|
 
 #### Net filter
-當有LED通過機器時閃爍，必須安裝`kmod-ipt-led`
+> 當有LED通過機器時閃爍，必須安裝`kmod-ipt-led`
 
 -------
 
@@ -150,6 +173,7 @@ config 'led' 'wlan_led'
 ```
 
 3G LED
+
 ```
 config 'led'
 	option 'name'           '3G'
