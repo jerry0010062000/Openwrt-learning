@@ -1,6 +1,3 @@
-/*
-*   Invoke object client
-*/
 #include <stdio.h>
 #include <unistd.h>
 #include <libubus.h>

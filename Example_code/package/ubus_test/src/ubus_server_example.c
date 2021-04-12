@@ -1,5 +1,3 @@
-//ubus registered object server (test file)
-//提供object 
 #include <stdio.h>
 #include <unistd.h>
 #include <libubus.h>
@@ -7,24 +5,31 @@
 #include <libubox/blob.h>
 #include <libubox/blobmsg.h>
 
+/*
+*	向ubus註冊一個object named - peko.
+*	object peko 總共有兩個method供其他人invoke.
+*	1. counter: server會回傳這個object總共被呼叫幾次了
+*	2. echo: 會在句尾加上peko回傳給你
+*/
+
 static struct ubus_context *ctx;
 static struct ubus_request_data req_data;
 static struct blob_buf bb;	//暫存傳進來的message
 static int kuei_counter =0;
 
-//宣告當被呼叫到時的觸發函數 實作在後面
+//宣告當被呼叫到時的觸發函數
 static int cnt_handler( struct ubus_context *ctx, struct ubus_object *obj,struct ubus_request_data *req, const char *method,struct blob_attr *msg );
 static int echo_handler( struct ubus_context *ctx, struct ubus_object *obj,struct ubus_request_data *req, const char *method,struct blob_attr *msg );
 
-//object KUEI
+//枚舉object所有method
 enum{
-	KUEI_ECHO,	//回復傳入的值
-	KUEI_CNT,	//回傳被使用次數
-	__KUEI_MAX,
+	PEKO_counter,
+	PEKO_echo,
+	__PEKO_MAX,
 };
 
 //指定msg 資料解析方式(policy)
-static const struct blobmsg_policy cnt_policy[] =
+static const struct blobmsg_policy counter_policy[] =
 {
 	[KUEI_ECHO] = { .name="echo", .type=BLOBMSG_TYPE_STRING},
 };
