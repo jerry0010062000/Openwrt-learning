@@ -29,7 +29,6 @@ hotplug package和kernel中的hotplug模組是不同的東西，hotplug package�
 設備驅動程式(Device Driver)，是一個允許應用軟體與硬體互動的程式，這個程式建立了一個硬體與硬體，或硬體與軟體溝通的介面(interface)。CPU經由主機板上的總線(BUS)或其他溝通子系統(subsystem)與硬體形成連接，這樣的連接使得硬體之間交換數據成為可能。
 
 > 驅動程式是提供硬體到操作的一個接口，並且協調兩者之間的關係
-> 
 
 電腦系統只要硬體由CPU、儲存器(內部和外部)、外部設備組成。驅動的對象一般是儲存器和外部設備，Linux將這些設備分成3大類
 1. 字符設備(char):指那些能一個byte一個byte讀取的設備，如LED、鍵盤、滑鼠..等，這種設備通常要在驅動層實現open()、close()、write()、read()、ioctl()等函數，這些函數最終會被filesystem中的相關函數調用，kernel會為這種設備建立一個對應文件。
@@ -180,5 +179,4 @@ USB Device是由一些`Configuration`、`Interface`、`Endpoint`組成，亦即�
 `ntfs-3g`如果選擇kmod-fs-ntfs掛載會變成read only，兩個都選mount時需要-t ntfs-3g指定，否則會預設ntfs read only。
 
 -------------
-
 

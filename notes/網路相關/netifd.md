@@ -262,13 +262,13 @@ config 'interface' 'wan'
 -------------
 <h3 id="ubus">UBUS object & method</h2>
 
-netifd在初始化時會向ubusd註冊object:`network`、(後面省略network.)`device`、`wireless`、`interface`。
+netifd在初始化時會向ubusd註冊object:`network`、`network.device`、`network.wireless`、`network.interface`。
 |Path|Procedure|Description|
 |---|---|--------------|
 |network|restart|重新啟動netifd|
 |network|reload|重新讀取相關config|
 |network.device|status|顯示所有Device設定|
-|network.device|set_state||
+|network.device|set_state|顯示device information|
 |network.interface.name|up|啟動interface|
 |network.interface.name|down|關閉interface|
 |network.interface.name|status|顯示該interface相關設置|
@@ -277,6 +277,12 @@ netifd在初始化時會向ubusd註冊object:`network`、(後面省略network.)`
 |network.interface.name|add_device|將ifname從此interface移除掉|
 
 -----------------
+
+# Protocol script 
+
+/lib/netifd/proto.sh
+
+-----
 ## 問題清單
 
 <h3 id="Def_C">Default Config是如何生成的?</h2>
@@ -309,6 +315,18 @@ network配置文件生成依賴於`board.json`
 
 
 <h2>Config如何改變且在何時何處reload?</h2>
+
+-----
+
+# UCI network state
+
+/var/state/network <-runtime狀態會顯示在這裡
+uci -p /var/state/show network 
+
+
+##  shell api 
+ubus parse network info by ubus
+file: /lib/functions/network.sh
 
 
 

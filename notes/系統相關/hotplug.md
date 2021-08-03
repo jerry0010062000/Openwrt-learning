@@ -3,7 +3,6 @@
 > [linux的統一設備模型](https://www.binss.me/blog/sysfs-udev-and-Linux-Unified-Device-Model/)、
 > [openwrt中設備節點的自動創建](https://blog.csdn.net/agave7/article/details/96181789)，
 > 參考自[OpenWRT Hotplug原理分析](https://github.com/wywincl/hotplug)
-> 
 
 + [Overview](#overview)
 + [Hotplug](#hotplug)
@@ -14,8 +13,6 @@
 <h1 id="overview">Overview</h1>
 
 當某些events發生時，Procd 會執行位於`/etc/hotplug.d/`中的腳本，eg.interface up/down，檢測到新的儲存驅動時，或者按下buttom時。該功能模組模擬/擴展了以淘汰的hotplug2的功能
-
-
 
 -------
 
@@ -75,7 +72,6 @@ cat << "EOF" > /etc/hotplug.d/iface/99-my-action
 } 
 EOF
 ```
-
 
 
 

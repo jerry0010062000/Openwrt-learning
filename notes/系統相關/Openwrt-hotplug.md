@@ -1,4 +1,25 @@
-# Openwrt USB
+# Openwrt Hotplug
+
++ [Overview](#overview)
++ [Block事件](#block)
+
+-----
+
+<h1 id="overview">Overview</h1>
+
+當某些事件發生時，procd會執行位於 `/etc/hotplug.d/` 中的腳本，procd不知道要怎麼處理hotplug事件，也沒必要知道，因為他只實現機制，不實現策略，事件的處理是由配置文件`/etc/hotplug.json`決定的。
+
+打開`/etc/hotplug.d`資料夾，你會發現下面還有數個子資料夾，每個資料夾皆存放了相關功能的腳本
+
+<h2 id="uevent">Uevent</h2>
+
+hotplug的過程會分為兩部分:
+1. kernel發出uevent事件
+	- kernel透過socket來發送uevent，事件的相關訊息會透過環境變數來傳遞，如`$ACTION $DEVPATH $SUBSYSTEM`
+2. user space監聽uevent
+	- 收到uevent後，根據`/etc/hotplug.json`的描述去呼叫`/sbin/hotplug-call`並帶入不同的參數，再根據`$SUBSYSTEM`到`/etc/hotplug.d/`下的資料夾去依序執行腳本。
+
+--------
 
 配置外部磁碟空間步驟
 1. verify storage drivers
